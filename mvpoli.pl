@@ -1,6 +1,5 @@
-% 5 * x ^ 6: * y ^ 3
-% as_monomial(C, X) :- C \= X, atomic(X).
-
+%%% Antonio Vivace 793509
+%% Parsing
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
   sort(2, @>=, P, O).
@@ -61,6 +60,7 @@ td([v(N1, _)], N1).
 
 td([], 0).
 
+%% Printing
 pprint_polynomial(poly(L)) :-
   pprint_pp(L).
 
@@ -74,7 +74,7 @@ pprint_pp([M | Ms]) :-
   write(' + '),
   pprint_pp(Ms).
 
-pprint_m(m(X, Y, L)) :-
+pprint_m(m(X, _, L)) :-
   write(X),
   write(' * '),
   pprint_mm(L).
@@ -96,9 +96,5 @@ pprint_v(v(X, Y)) :-
   write('^'),
   write(X).
 
-test2([X | Y], X, Y).
-% test(X * Y, X, Y).
-%sortm(m(X, Y, Vars), m(X, Y, Ordered)) :-
-% sort(2, @=<, Vars, Ordered).
+%% Operations
 
-% coefficients(poly([X | Xs]), X).
