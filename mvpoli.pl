@@ -60,6 +60,43 @@ td([v(N1, _) | Vs], N) :-
 td([v(N1, _)], N1).
 
 td([], 0).
+
+pprint_polynomial(poly(L)) :-
+  pprint_pp(L).
+
+pprint_pp([m(A, B, C)]) :-
+  !,
+  pprint_m(m(A, B, C)).
+
+pprint_pp([M | Ms]) :-
+  !,
+  pprint_m(M),
+  write(' + '),
+  pprint_pp(Ms).
+
+pprint_m(m(X, Y, L)) :-
+  write(X),
+  write(' * '),
+  pprint_mm(L).
+
+pprint_mm([L]) :-
+  asvar(_, L),
+  !,
+  pprint_v(L).
+
+pprint_mm([L | Ls]) :-
+  !,
+  pprint_v(L),
+  write(' * '),
+  pprint_mm(Ls).
+
+pprint_v(v(X, Y)) :-
+  upcase_atom(Y, Yc),
+  write(Yc),
+  write('^'),
+  write(X).
+
+test2([X | Y], X, Y).
 % test(X * Y, X, Y).
 %sortm(m(X, Y, Vars), m(X, Y, Ordered)) :-
 % sort(2, @=<, Vars, Ordered).
