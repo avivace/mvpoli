@@ -159,7 +159,7 @@ maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
-
+% todo
 polyplus(_).
 polyminus(_).
 polytimes(_).
