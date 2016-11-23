@@ -3,7 +3,12 @@
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
   norm_p(P, O).
-%sort(2, @>=, P, O).
+
+as_monomial(X, m(C, TD, Vs)) :-
+  as_monomial_p(X, C, Vd),
+  td(Vd, TD),
+  norm_m(Vd, Vs).
+
 
 as_polynomial_p(X + Y, [M | Ms]) :-
   as_monomial(Y, M),
@@ -23,12 +28,6 @@ as_monomial_i(X, m(OC, TD, Vs)) :-
   OC is -C,
   td(Vs, TD).
 
-as_monomial(X, m(C, TD, Vs)) :-
-  as_monomial_p(X, C, Vd),
-  td(Vd, TD),
-  norm_m(Vd, Vs).
-  %sort(2, @=ss<, Vd, Vs).
-
 as_monomial_p(X, X, []) :-
   number(X),
   !.
@@ -41,16 +40,14 @@ as_monomial_p(X * Y, C, [V | Vs]) :-
 as_monomial_p(X, 1, [V]) :-
   asvar(X, V).
 
-% Variables with more that 1 chars names are legal?
+% FIXME Variables with more that 1 chars names are legal?
 % Current behaviour is ab^3 has ab as name =/= a*b^3
 asvar(X ^ N, v(N, X)) :-
-  % atom(X)
   integer(N),
   !,
   N >= 0.
 
 asvar(X ^ N, v(N, X)) :-
-  % atom(X),
   atom(N),
   !.
 
@@ -65,6 +62,44 @@ td([v(N1, _) | Vs], N) :-
 td([v(N1, _)], N1).
 
 td([], 0).
+
+%% Normalization
+norm_m(X, O) :-
+  sort(2, @=<, X, SX),
+  norm_mm(SX, O).
+
+norm_mm([v(C1, X) , v(C2, X) | Ms], MMs) :-
+  !,
+  C3 is C1+C2,
+  norm_mm([v(C3,X) | Ms] , MMs).
+
+norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
+  !,
+  X \= Y,
+  norm_mm([v(C2,Y) | Ms], MMs).
+
+norm_mm([v(C1, X)], [v(C1,X)]).
+
+norm_p(Ms, OMs) :-
+  sort(2, @>=, Ms, O),
+  norm_pp(O, OMs).
+
+norm_pp([m(0, _, _), m(C2, S2, Y) | Ms], MMs) :-
+  !,
+  norm_pp([m(C2, S2, Y) | Ms], MMs).
+
+norm_pp([m(C1, S1, X), m(C2, _, X) | Ms], MMs ) :-
+  !,
+  C3 is C1+C2,
+  norm_pp([m(C3, S1, X) | Ms], MMs).
+
+norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
+  !,
+  X \= Y,
+  norm_pp([m(C2, S2, Y) | Ms], MMs).
+
+norm_pp([m(0, _, _)], []) :- !.
+norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 
 %% Checking
 is_monomial(m(_, TD, VPs)) :-
@@ -127,6 +162,7 @@ pprint_v(v(X, Y)) :-
   write(X).
 
 %% Operations
+
 coefficients(poly(Ms), C) :-
   coefficients_l(Ms, C).
 
@@ -166,42 +202,31 @@ maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
-%% Normalization
-norm_m(X, O) :-
-  sort(2, @=<, X, SX),
-  norm_mm(SX, O).
+polyplus(poly(P1), poly(P2), poly(P3)) :-
+  append(P1, P2, P3o),
+  norm_p(P3o, P3).
 
-norm_mm([v(C1, X) , v(C2, X) | Ms], MMs) :-
-  !,
-  C3 is C1+C2,
-  norm_mm([v(C3,X) | Ms] , MMs).
+polyminus(P1, P2, P3) :-
+  poly_i(P2, P2i),
+  polyplus(P1, P2i, P3).
 
-norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
-  !,
-  X \= Y,
-  norm_mm([v(C2,Y) | Ms], MMs).
+poly_i(poly(Ms), poly(IMs)) :-
+  poly_ii(Ms, IMs).
 
-norm_mm([v(C1, X)], [v(C1,X)]).
+poly_ii([ M | Ms], [OM | OMs] ) :-
+  monomial_i(M, OM),
+  poly_ii(Ms, OMs).
 
-norm_p(Ms, OMs) :-
-  sort(2, @>=, Ms, O),
-  norm_pp(O, OMs).
+poly_ii([M], [Om]) :-
+  monomial_i(M, Om).
 
-norm_pp([m(C1, S1, X), m(C2, _, X) | Ms], MMs ) :-
-  !,
-  C3 is C1+C2,
-  norm_pp([m(C3, S1, X) | Ms], MMs).
+monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
+  Ci is -C.
 
-norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
-  !,
-  X \= Y,
-  norm_pp([m(C2, S2, Y) | Ms], MMs).
 
-norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 
 
 % todo
-polyplus(_).
 polyminus(_).
 polytimes(_).
 polyval(_).

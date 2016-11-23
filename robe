@@ -1,0 +1,15 @@
+
+
+poly(0)
+
+
+as_polynomial(7 * x ^ 3 * k^9 + k^9 + x^2 - 7 * x ^ 3 + 7 * x ^ 3, X),
+  pprint_polynomial(X).
+
+
+as_polynomial(0 * z - 0 * x ^ 2 + 1 * x, X),
+pprint_polynomial(X),
+polyplus(X,X, R),
+write("  STAMPO RISULTATO EHEHEHE XD  "),
+pprint_polynomial(R).
+
