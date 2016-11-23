@@ -64,6 +64,21 @@ td([v(N1, _)], N1).
 
 td([], 0).
 
+%% Checking
+is_monomial(m(_, TD, VPs)) :-
+  integer(TD),
+  TD >= 0,
+  is_list(VPs).
+
+is_varpower(v(Power, VarSymbol)) :-
+  integer(Power),
+  Power >= 0,
+  atom(VarSymbol).
+
+is_polynomial(poly(Monomials)) :-
+  is_list(Monomials),
+  foreach(member(M, Monomials), is_monomial(M)).
+
 %% Printing
 pprint_polynomial(poly(L)) :-
   pprint_pp(L).
@@ -133,13 +148,22 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 % Is this acceptable as Output?
 % Should we presume that the input is ordered? (e.g. generated with
 % as_polynomials)
-monomials(poly(Ms), C) :-
-  list_to_set(Ms, C).
+% 
+% monomials(poly(Ms), C) :-
+%  list_to_set(Ms, C).
+
+monomials(poly(Ms), Ms).
+
+maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
+
+mindegree(poly(Ms), MinD) :-
+  reverse(Ms, ([m(_, MinD, _) | _])).
 
 
-
-
-
+polyplus(_).
+polyminus(_).
+polytimes(_).
+polyval(_).
 
 
 
