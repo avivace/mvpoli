@@ -2,7 +2,8 @@
 %% Parsing
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
-  sort(2, @>=, P, O).
+  norm_p(P, O).
+%sort(2, @>=, P, O).
 
 as_polynomial_p(X + Y, [M | Ms]) :-
   as_monomial(Y, M),
@@ -25,7 +26,8 @@ as_monomial_i(X, m(OC, TD, Vs)) :-
 as_monomial(X, m(C, TD, Vs)) :-
   as_monomial_p(X, C, Vd),
   td(Vd, TD),
-  sort(2, @=<, Vd, Vs).
+  norm_m(Vd, Vs).
+  %sort(2, @=ss<, Vd, Vs).
 
 as_monomial_p(X, X, []) :-
   number(X),
@@ -113,6 +115,11 @@ pprint_mm([L | Ls]) :-
   write(' * '),
   pprint_mm(Ls).
 
+pprint_v(v(1, Y)) :-
+  !,
+  upcase_atom(Y, Yc),
+  write(Yc).
+
 pprint_v(v(X, Y)) :-
   upcase_atom(Y, Yc),
   write(Yc),
@@ -158,6 +165,40 @@ maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
+
+%% Normalization
+norm_m(X, O) :-
+  sort(2, @=<, X, SX),
+  norm_mm(SX, O).
+
+norm_mm([v(C1, X) , v(C2, X) | Ms], MMs) :-
+  !,
+  C3 is C1+C2,
+  norm_mm([v(C3,X) | Ms] , MMs).
+
+norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
+  !,
+  X \= Y,
+  norm_mm([v(C2,Y) | Ms], MMs).
+
+norm_mm([v(C1, X)], [v(C1,X)]).
+
+norm_p(Ms, OMs) :-
+  sort(2, @>=, Ms, O),
+  norm_pp(O, OMs).
+
+norm_pp([m(C1, S1, X), m(C2, _, X) | Ms], MMs ) :-
+  !,
+  C3 is C1+C2,
+  norm_pp([m(C3, S1, X) | Ms], MMs).
+
+norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
+  !,
+  X \= Y,
+  norm_pp([m(C2, S2, Y) | Ms], MMs).
+
+norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
+
 
 % todo
 polyplus(_).
