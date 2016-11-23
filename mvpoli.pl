@@ -39,12 +39,16 @@ as_monomial_p(X * Y, C, [V | Vs]) :-
 as_monomial_p(X, 1, [V]) :-
   asvar(X, V).
 
+% Variables with more that 1 chars names are legal?
+% Current behaviour is ab^3 has ab as name =/= a*b^3
 asvar(X ^ N, v(N, X)) :-
+  % atom(X)
   integer(N),
   !,
   N >= 0.
 
 asvar(X ^ N, v(N, X)) :-
+  % atom(X),
   atom(N),
   !.
 
@@ -74,6 +78,10 @@ pprint_pp([M | Ms]) :-
   write(' + '),
   pprint_pp(Ms).
 
+pprint_m(m(1, _, L)) :-
+  !,
+  pprint_mm(L).
+
 pprint_m(m(X, _, L)) :-
   write(X),
   write(' * '),
@@ -97,4 +105,52 @@ pprint_v(v(X, Y)) :-
   write(X).
 
 %% Operations
+coefficients(poly(Ms), C) :-
+  coefficients_l(Ms, C).
+
+coefficients_l([m(C, _, _)], [C]) :- !.
+
+coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
+  coefficients_l(Ms, Cs).
+
+variables(poly(Ms), C) :-
+  variables_m(Ms, Cd),
+  list_to_set(Cd, C).       % Remove duplicates
+
+variables_m([m(_, _, Vars)], [V]):-
+  !,
+  variables_vars(Vars, V).
+
+variables_m([m(_, _, Vars) | Ms], [V | Vs]) :-
+  variables_vars(Vars, V),
+  variables_m(Ms, Vs).
+
+variables_vars([v(_, N)], N) :- !.
+
+variables_vars([v(_, N) | Vs], [N | Ns]) :-
+  variables_vars(Vs, Ns).
+
+% Is this acceptable as Output?
+% Should we presume that the input is ordered? (e.g. generated with
+% as_polynomials)
+monomials(poly(Ms), C) :-
+  list_to_set(Ms, C).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
