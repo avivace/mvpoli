@@ -1,13 +1,14 @@
 %%% Antonio Vivace 793509
+
 %% Parsing
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
   norm_p(P, O).
 
-as_monomial(X, m(C, TD, Vs)) :-
+as_monomial(X, NM) :-
   as_monomial_p(X, C, Vd),
   td(Vd, TD),
-  norm_m(Vd, Vs).
+  norm_m(m(C, TD, Vd), NM).
 
 as_polynomial_p(X + Y, [M | Ms]) :-
   as_monomial(Y, M),
@@ -39,8 +40,7 @@ as_monomial_p(X * Y, C, [V | Vs]) :-
 as_monomial_p(X, 1, [V]) :-
   asvar(X, V).
 
-% FIXME Variables with more that 1 chars names are legal?
-% Current behaviour is ab^3 has ab as name =/= a*b^3
+% FIXME variables/atom question
 asvar(X ^ N, v(N, X)) :-
   integer(N),
   !,
@@ -63,9 +63,10 @@ td([v(N1, _)], N1).
 td([], 0).
 
 %% Normalization
-norm_m([], []) :- !.
-% TODO: A 0 coefficient should delete the other values
-norm_m(X, O) :-
+norm_m(m(C, Td, []), m(C, Td, [])) :- !.
+norm_m(m(0, _, _), m(0, 0, [])) :- !.
+
+norm_m(m(C, G, X), m(C, G, O)) :-
   sort(2, @=<, X, SX),
   norm_mm(SX, O).
 
@@ -170,7 +171,6 @@ pprint_v(v(X, Y)) :-
   write(X).
 
 %% Operations
-
 coefficients(poly(Ms), C) :-
   coefficients_l(Ms, C).
 coefficients_l([], []) :- !.
@@ -182,7 +182,7 @@ coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
 
 variables(poly(Ms), C) :-
   variables_m(Ms, Cd),
-  list_to_set(Cd, C).       % Remove duplicates
+  list_to_set(Cd, C).
 
 variables_m([], []) :- !.
 
@@ -199,13 +199,7 @@ variables_vars([v(_, N)], N) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
-% Is this acceptable as Output?
-% Should we presume that the input is ordered? (e.g. generated with
-% as_polynomials)
-% 
-% monomials(poly(Ms), C) :-
-%  list_to_set(Ms, C).
-
+% FIXME this output is acceptable?
 monomials(poly(Ms), Ms).
 
 maxdegree(poly([]), MinInf) :-
@@ -221,6 +215,7 @@ mixdegree(poly([]), MinInf) :-
   !,
   MinInf is -1.
 
+% 0 is neutral for +
 polyplus(P1, poly([]), P1) :- !.
 polyplus(poly([]), P1, P1) :- !.
 
@@ -245,18 +240,44 @@ poly_ii([M], [Om]) :-
 monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
   Ci is -C.
 
-% (X * 4) * (Z ^4) = 4 * X ^ 4
 monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), m(C3, Td3, Vars3n)) :-
   C3 is C1 * C2,
   Td3 is Td1 + Td2,
   append(Vars1, Vars2, Vars3),
-  norm_m(Vars3, Vars3n).
+  norm_m(m(C3, Td3, Vars3), m(C3, Td3, Vars3n)).
 
+% 0 is absorbing for *
 polytimes(_, poly([]), poly([])) :- !.
 polytimes(poly([]), _, poly([])) :- !.
 
-% todo
-polytimes(_).
+% 1 is neutral for *
+polytimes(A, poly([m(1, _, _)]), A) :- !.
+polytimes(poly([m(1, _, _)]), A, A) :- !.
+
+polytimes(poly(M1s), poly(M2s), poly(Result)) :-
+  polytimes_m(M1s, M2s, Result).
+
+polytimes_m(M1s, [m(C, Td, Vars)], [R]) :-
+  !,
+  polymono(M1s, m(C, Td, Vars), R).
+
+polytimes_m(M1s, [M2 | M2s], [R | Rs]) :-
+  polymono(M1s, M2, R),
+  polytimes_m(M1s, M2s, Rs).
+
+polymono([m(C1, Td1, Vars1)], m(C2, Td2, Vars2), R) :-
+  !,
+  monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), R).
+
+polymono([M | Ms], M2, [R | [Rs]]) :-
+  monotimes(M, M2, R),
+  polymono(Ms, M2, Rs).
+
+
+
+
+
+% TODO
 polyval(_).
 
 
