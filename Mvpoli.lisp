@@ -8,7 +8,7 @@
               (>= mtd 0)
               (listp vps)
               (every #'is-varpower vps)))))
-
+(defun x)
 
 (defun as-monomial (x) 
   (cond ((integerp x)
