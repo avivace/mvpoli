@@ -41,6 +41,7 @@ as_monomial_p(X, 1, [V]) :-
   asvar(X, V).
 
 % FIXME variables/atom question
+% asvar(_ ^ 0, []) :- !.
 asvar(X ^ N, v(N, X)) :-
   integer(N),
   !,
@@ -65,6 +66,7 @@ td([], 0).
 %% Normalization
 norm_m(m(C, Td, []), m(C, Td, [])) :- !.
 norm_m(m(0, _, _), m(0, 0, [])) :- !.
+norm_m(m(C, 0, _), m(C, 0, [])) :- !.
 
 norm_m(m(C, G, X), m(C, G, O)) :-
   sort(2, @=<, X, SX),
@@ -251,8 +253,8 @@ polytimes(_, poly([]), poly([])) :- !.
 polytimes(poly([]), _, poly([])) :- !.
 
 % 1 is neutral for *
-polytimes(A, poly([m(1, _, _)]), A) :- !.
-polytimes(poly([m(1, _, _)]), A, A) :- !.
+polytimes(A, poly([m(1, _, [])]), A) :- !.
+polytimes(poly([m(1, _, [])]), A, A) :- !.
 
 polytimes(poly(M1s), poly(M2s), poly(Result)) :-
   polytimes_m(M1s, M2s, Result).
@@ -269,27 +271,11 @@ polymono([m(C1, Td1, Vars1)], m(C2, Td2, Vars2), R) :-
   !,
   monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), R).
 
-polymono([M | Ms], M2, [R | [Rs]]) :-
+polymono([M | Ms], M2, [R | Rs]) :-
   monotimes(M, M2, R),
   polymono(Ms, M2, Rs).
-
-
-
-
 
 % TODO
 polyval(_).
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+monoval(m(C, _, , [])).
