@@ -9,7 +9,6 @@ as_monomial(X, m(C, TD, Vs)) :-
   td(Vd, TD),
   norm_m(Vd, Vs).
 
-
 as_polynomial_p(X + Y, [M | Ms]) :-
   as_monomial(Y, M),
   !,
@@ -64,6 +63,8 @@ td([v(N1, _)], N1).
 td([], 0).
 
 %% Normalization
+norm_m([], []) :- !.
+% TODO: A 0 coefficient should delete the other values
 norm_m(X, O) :-
   sort(2, @=<, X, SX),
   norm_mm(SX, O).
@@ -120,6 +121,10 @@ is_polynomial(poly(Monomials)) :-
 pprint_polynomial(poly(L)) :-
   pprint_pp(L).
 
+pprint_pp([]) :-
+  !,
+  write(0).
+
 pprint_pp([m(A, B, C)]) :-
   !,
   pprint_m(m(A, B, C)).
@@ -133,6 +138,9 @@ pprint_pp([M | Ms]) :-
 pprint_m(m(1, _, L)) :-
   !,
   pprint_mm(L).
+pprint_m(m(X, 0, [])) :-
+  !,
+  write(X).
 
 pprint_m(m(X, _, L)) :-
   write(X),
@@ -165,6 +173,7 @@ pprint_v(v(X, Y)) :-
 
 coefficients(poly(Ms), C) :-
   coefficients_l(Ms, C).
+coefficients_l([], []) :- !.
 
 coefficients_l([m(C, _, _)], [C]) :- !.
 
@@ -174,6 +183,8 @@ coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
 variables(poly(Ms), C) :-
   variables_m(Ms, Cd),
   list_to_set(Cd, C).       % Remove duplicates
+
+variables_m([], []) :- !.
 
 variables_m([m(_, _, Vars)], [V]):-
   !,
@@ -197,10 +208,21 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 
 monomials(poly(Ms), Ms).
 
+maxdegree(poly([]), MinInf) :-
+  !,
+  MinInf is -1.
+
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
+
+mixdegree(poly([]), MinInf) :-
+  !,
+  MinInf is -1.
+
+polyplus(P1, poly([]), P1) :- !.
+polyplus(poly([]), P1, P1) :- !.
 
 polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
@@ -223,11 +245,17 @@ poly_ii([M], [Om]) :-
 monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
   Ci is -C.
 
+% (X * 4) * (Z ^4) = 4 * X ^ 4
+monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), m(C3, Td3, Vars3n)) :-
+  C3 is C1 * C2,
+  Td3 is Td1 + Td2,
+  append(Vars1, Vars2, Vars3),
+  norm_m(Vars3, Vars3n).
 
-
+polytimes(_, poly([]), poly([])) :- !.
+polytimes(poly([]), _, poly([])) :- !.
 
 % todo
-polyminus(_).
 polytimes(_).
 polyval(_).
 

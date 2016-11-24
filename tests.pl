@@ -20,12 +20,12 @@ pprint_polynomial(R).
 as_polynomial(5 * x - 5 * x  + y, X),
 as_polynomial(z - y, Y),
 write("X:"),
-pprint_polynomials(X),
+pprint_polynomial(X),
 write("   Y:"),
-print_polynomial(Y),
+pprint_polynomial(Y),
 polyminus(X, Y, Result),
 write("    X-Y:"),
-pprint_polynomial(Result).
+pprint_polynomial(Result),
 polyplus(X, Y, ResultS),
 write("    X+Y:"),
 pprint_polynomial(ResultS).
