@@ -23,28 +23,52 @@
 (defun monomials (x)
   (second x))
 
+(defun flatten (l)
+  (cond ((null l) nil)
+        ((atom l) (list l))
+        (t (loop for a in l appending (flatten a)))))
+
 (defun variables-helper (x)
-  (if (eql '() x)
-      (var-of (car x))
-      (list (var-of (car x)) (variables-helper (cdr x)))))
+  (if (not (eql '() x))
+      (cons (var-of (car x)) (variables-helper (cdr x)))))
+
 
 (defun variables (x)
-  (variables-helper (second x)))
+  (remove-duplicates (flatten (variables-helper (second x)))))
+
+(defun coefficients (x)
+  (flatten (coefficients-helper (second x))))
+
+(defun coefficients-helper (x)
+  (if (not (eql '() x))
+      (cons (monomial-coefficient (car x)) (coefficients-helper (cdr x)))))
+
+(defun maxdegree (x)
+  (apply 'max (poly-degrees (second x))))
+
+(defun mindegree (x)
+  (apply 'min (poly-degrees (second x))))
+
+(defun poly-degrees (x)
+  (if (not (eql '() x))
+      (cons (monomial-degree (car x)) (poly-degrees (cdr x)))))
 
 ;;; Parsing and normalization
 
+;; da fixare : monomio non normalizzato in caso di variabili uguali
 (defun as-monomial (x) 
   (cond ((integerp x)
          (list 'm x 0 'nil))
         ((and (atom x) (symbolp x)) 
               (list 'm 1 1 (list 'v 1 x)))
         ((eql (car x) '*) 
-         (let ((a (as-monomial-helper (cdr x) 0)))
-            (list 'm (if (integerp (second x))
-                         (second x)
-                         1)
-                  (first (last a))
-                  (sort (butlast a) #' string-lessp :key #' third))))))
+         (if (integerp (second x))
+             (let ((a (as-monomial-helper (cdr (cdr x)) 0)))         
+               (list 'm (second x) (first (last a))
+                     (sort (butlast a) #' string-lessp :key #' third)))
+             (let ((a (as-monomial-helper (cdr x) 0)))         
+               (list 'm 1 (first (last a))
+                     (sort (butlast a) #' string-lessp :key #' third)))))))
 
 
 (defun as-monomial-helper (x acc)
@@ -55,11 +79,12 @@
                   (as-monomial-helper (cdr x) (+ acc 1)))) 
             (T (cons (list 'v (third (car x)) (second (car x)))
               (as-monomial-helper (cdr x) (+ acc (third (car x)))))))))
-        
+
+;; da fixare : i monomi devono essere ordinati lessicalmente a parità di grado       
 (defun as-polynomial (x)
   (if (eql (car x) '+)
       (let ((a (as-polynomial-helper (cdr x))))
-        (list 'p (sort a #'> :key #' third)))))
+        (list 'p (sort a #'> :key #' second)))))
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
       (list (as-monomial (car x)))
@@ -103,7 +128,4 @@
 ;; polyminus
 ;; polytimes
 ;; polyplus
-;; mindegree
-;; maxdegree
-;; coefficients 
-;; variables
+
