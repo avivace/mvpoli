@@ -1,5 +1,8 @@
 %%% Antonio Vivace 793509
 
+
+%FIXME: spareggio in caso di grado uguale
+
 %% Parsing
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
@@ -102,7 +105,7 @@ norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
   X \= Y,
   norm_pp([m(C2, S2, Y) | Ms], MMs).
 
-norm_pp([m(0, _, _)], []) :- !.
+% norm_pp([m(0, _, _)], []) :- !.
 norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 
 %% Checking
@@ -186,18 +189,18 @@ variables(poly(Ms), C) :-
   variables_m(Ms, Cd),
   list_to_set(Cd, C).
 
-variables_m([], []) :- !.
+variables_m([m(_, _, [])], []) :- !.
 
-variables_m([m(_, _, Vars)], [V]):-
+variables_m([m(_, _, Vars)], V):-
   !,
   variables_vars(Vars, V).
 
-variables_m([m(_, _, Vars) | Ms], [V | Vs]) :-
+variables_m([m(_, _, Vars) | Ms], R) :-
   variables_vars(Vars, V),
-  variables_m(Ms, Vs).
+  variables_m(Ms, Vs),
+  append(V, Vs, R).
 
-variables_vars([v(_, N)], N) :- !.
-
+variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
@@ -218,8 +221,8 @@ mixdegree(poly([]), MinInf) :-
   MinInf is -1.
 
 % 0 is neutral for +
-polyplus(P1, poly([]), P1) :- !.
-polyplus(poly([]), P1, P1) :- !.
+polyplus(P1, poly([m(0, _, _)]), P1) :- !.
+polyplus(poly([m(0, _, _)]), P1, P1) :- !.
 
 polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
@@ -249,8 +252,8 @@ monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), m(C3, Td3, Vars3n)) :-
   norm_m(m(C3, Td3, Vars3), m(C3, Td3, Vars3n)).
 
 % 0 is absorbing for *
-polytimes(_, poly([]), poly([])) :- !.
-polytimes(poly([]), _, poly([])) :- !.
+polytimes(_, poly([m(0, _, _)]), poly([m(0, 0, [])])) :- !.
+polytimes(poly([m(0,_, _)]), _, poly([m(0, 0, [])])) :- !.
 
 % 1 is neutral for *
 polytimes(A, poly([m(1, _, [])]), A) :- !.
@@ -278,4 +281,8 @@ polymono([M | Ms], M2, [R | Rs]) :-
 % TODO
 polyval(_).
 
-monoval(m(C, _, , [])).
+%monoval(m(C, _, , [])).
+
+test(X, R) :-
+  write(Stream, X),
+  read(R, Stream, []).
