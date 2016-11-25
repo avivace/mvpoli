@@ -88,8 +88,9 @@ norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
 norm_mm([v(C1, X)], [v(C1,X)]).
 
 norm_p(Ms, OMs) :-
-  sort(2, @>=, Ms, O),
-  norm_pp(O, OMs).
+  sort(3, @=<, Ms, O),
+  sort(2, @>=, O, Or),
+  norm_pp(Or, OMs).
 
 norm_pp([m(0, _, _), m(C2, S2, Y) | Ms], MMs) :-
   !,
