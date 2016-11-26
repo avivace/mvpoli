@@ -1,2 +1,1 @@
-# mvpoli
-i
+# Multivariate Polynomials
