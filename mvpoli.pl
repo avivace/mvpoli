@@ -1,8 +1,5 @@
 %%% Antonio Vivace 793509
 
-
-%FIXME: spareggio in caso di grado uguale
-
 %% Parsing
 as_polynomial(X, poly(O)) :-
   as_polynomial_p(X, P),
@@ -279,11 +276,7 @@ polymono([M | Ms], M2, [R | Rs]) :-
   monotimes(M, M2, R),
   polymono(Ms, M2, Rs).
 
-% TODO
-polyval(_).
-
-%monoval(m(C, _, , [])).
-
-test(X, R) :-
-  write(Stream, X),
-  read(R, Stream, []).
+polyval(Poly, Values, Result) :-
+  with_output_to(string(PPoly), pprint_polynomial(Poly)),
+  term_string(Term, PPoly, [variables(Values)]),
+  Result is Term.

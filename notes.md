@@ -18,17 +18,18 @@ Antonio Vivace
   The pprint-polynomial output is a correct (and valuable expression).
   Calling it with `Result is Output` and unification for every variable should
   work.
-  pprint-polynomial has not a proper output, just writing it.
-  
+  pprint-polynomial has not a proper output, just writing it to the output
   
 
 *solution 2*
 
+  - Prepare to get some gonorrea in 3-4 innested recursions
   - Evaluate every monomial passing the VarValues and sum the results
   - Evaluate variables and multiply with the Coefficient
   - Scan the variables and pass each of them to evaluate variable
   - Scan the VarValues for the Value of the current variable and pass
-      Value ^ Exp.  
+      Value ^ Exp.
+  - Honestly just die
 
 polyval(poly(), VarsValues, Result)
   Check if VarValues is a list of numbers with the same number of elements of
