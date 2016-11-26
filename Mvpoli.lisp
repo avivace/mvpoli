@@ -11,7 +11,7 @@
 
 (defun var-of (x)
   (let ((a (varpowers x)))
-    (var-of-helper a)))
+    (flatten (var-of-helper a))))
 
 (defun var-of-helper (x)
   (if (eql 'nil (cdr x))
@@ -34,7 +34,7 @@
 
 
 (defun variables (x)
-  (remove-duplicates (flatten (variables-helper (second x)))))
+  (remove-duplicates (flatten (variables-helper (second x))) :from-end t))
 
 (defun coefficients (x)
   (flatten (coefficients-helper (second x))))
@@ -84,7 +84,7 @@
 (defun as-polynomial (x)
   (if (eql (car x) '+)
       (let ((a (as-polynomial-helper (cdr x))))
-        (list 'p (sort a #'> :key #' second)))))
+        (list 'p (sort a #'> :key #' third)))))
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
       (list (as-monomial (car x)))
@@ -121,9 +121,86 @@
          (and (every #'is-monomial ms)))))
 
 
+;; polynomials' operations
+
+(defun polyval (x y)
+  (cond ((eql (first x) 'p)
+         (polyval-helper1 x y))
+        ((eql (first x) '+)
+         (let ((a (as-polynomial x)))
+           (polyval-helper1 a y)))
+        ((eql (first x) '*)
+         (let ((a (as-polynomial (list '+ x))))
+           (polyval-helper1 a y)))))
+
+(defun polyval-helper1 (x y)
+  (polyval-helper2 (second x) (var-values (variables x) y) 0))
+
+(defun polyval-helper2 (x y acc)
+  (if (not (eql (car x) 'nil))
+      (let ((a (+ acc (monomialval (car x) y))))
+        (polyval-helper2 (cdr x) y a))
+      acc))
+ 
+
+(defun find-val (x y)
+  (if (eql (car (car y)) x)
+      (cdr (car y))
+      (find-val x (cdr y))))
+      
+(defun monomialval (x y)
+  (if (not (eql (second x) 1))
+      (* (second x) (monomialval-helper (fourth x) y 1))
+      (monomialval-helper (fourth x) y 1)))
+
+(defun monomialval-helper (x y acc)
+  (if (not (eql (car x) 'nil))
+      (let ((a (car x))
+            (b (find-val (third (car x)) y)))
+        (if (> (second a) 1)
+            (let ((c (* acc (expt b (second a)))))
+              (monomialval-helper (cdr x) y c))
+            (let ((d (* acc b)))
+              (monomialval-helper (cdr x) y d))))
+      acc))
+          
+       
+        
+
+;; var-values trova la lista var/value da usare per polyval
+(defun var-values (x y)
+  (if (not (eql (car x) 'nil))
+      (cons (cons (car x) (car y)) (var-values (cdr x) (cdr y)))))
+  
+;;printing 
+
+(defun pprint-polynomial (x)
+  (pprint-polynomial-helper (second x)))
+
+(defun pprint-polynomial-helper (x)
+  (cond ((eql (cdr x) 'nil)
+         (pprint-monomial (car x)))
+        (T (pprint-monomial (car x))
+            (prin1 '+)
+            (pprint-polynomial-helper (cdr x)))))
+
+(defun pprint-monomial (x) 
+  (if (not (eql (second x) 1)) 
+        (prin1 (second x)))
+  (if (> (third x) 0)
+      (pprint-monomial-helper (fourth x))))
+
+(defun pprint-monomial-helper (x)
+  (if (not (eql (car x) 'nil))
+      (let ((a (car x)))
+        (prin1 (third a))
+        (cond ((> (second a) 1)
+               (prin1 '^) 
+               (prin1 (second a))))
+        (pprint-monomial-helper (cdr x)))))
+  
 ;; to do
 
-;; pprint-polynomial
 ;; polyval
 ;; polyminus
 ;; polytimes
