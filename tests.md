@@ -1,32 +1,18 @@
--? as_polynomial(4 * xy ^ 2 + 9 *y^10, X),
-pprint_polynomial(X).
+# Tests
 
+#### Polyval
+Query
+```
+?- as_polynomial(5*x^2*y^3 + y + z^5 + j^2 + a^6 - 42*z^3*a, P),
+variables(P, Vars),
+pprint_polynomial(P),
+polyval(P, [42, 2, 1, 22, 7], Val).
+```
 
-poly(0)
-
-
-as_polynomial(7 * x ^ 3 * k^9 + k^9 + x^2 - 7 * x ^ 3 + 7 * x ^ 3, X),
-  pprint_polynomial(X).
-
-
-as_polynomial(0 * z - 0 * x ^ 2 + 1 * x, X),
-pprint_polynomial(X),
-polyplus(X,X, R),
-write("  STAMPO RISULTATO EHEHEHE XD  "),
-pprint_polynomial(R).
-
-
-
-as_polynomial(5 * x - 5 * x  + y, X),
-as_polynomial(z - y, Y),
-write("X:"),
-pprint_polynomial(X),
-write("   Y:"),
-pprint_polynomial(Y),
-polyminus(X, Y, Result),
-write("    X-Y:"),
-pprint_polynomial(Result),
-polyplus(X, Y, ResultS),
-write("    X+Y:"),
-pprint_polynomial(ResultS).
-
+Expected Result
+```
+A^6 + 5 * X^2 * Y^3 + Z^5 + -42 * A * Z^3 + J^2 + Y
+P = poly([m(1, 6, [v(6, a)]), m(5, 5, [v(2, x), v(3, y)]), m(1, 5, [v(5, z)]), m(-42, 4, [v(1, a), v(3, z)]), m(1, 2, [v(2, j)]), m(1, 1, [v(..., ...)])]),
+Vars = [a, x, y, z, j],
+Val = 5475402374.
+```
