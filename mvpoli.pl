@@ -183,10 +183,15 @@ coefficients_l([m(C, _, _)], [C]) :- !.
 coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
   coefficients_l(Ms, Cs).
 
-% FIXME variables should be lexicographically ordered
-variables(poly(Ms), C) :-
+% Lexicographically ordered variables
+variables(P, Vars) :-
+  variables_ao(P, AOVars),
+  sort(0, @=<, AOVars, Vars).
+
+% Appearing ordered variables
+variables_ao(poly(Ms), Vars) :-
   variables_m(Ms, Cd),
-  list_to_set(Cd, C).
+  list_to_set(Cd, Vars).
 
 variables_m([m(_, _, [])], []) :- !.
 
@@ -203,7 +208,6 @@ variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
-% FIXME this output is acceptable?
 monomials(poly(Ms), Ms).
 
 maxdegree(poly([]), MinInf) :-
@@ -322,3 +326,49 @@ polyval(Poly, Values, Result) :-
   with_output_to(string(PPoly), pprint_polynomial(Poly)),
   term_string(Term, PPoly, [variables(Values)]),
   Result is Term.
+
+/*
+
+?- as_polynomial(x^2 + a + k^4 * c, P1),
+vvList(P1, InputList, VVList),
+variables_ao(P1, AOVars),
+getVValues(VVList, AOVars, ReorderedVVList),
+stripValues(ReorderedVVList, FinalAOValues),
+InputList = [10, 20, 30, 40],
+|    variables(P1, LGOVars).
+P1 = poly([m(1, 5, [v(1, c), v(4, k)]), m(1, 2, [v(2, x)]), m(1, 1, [v(1, a)])]),
+InputList = [10, 20, 30, 40],
+VVList = [ (a, 10), (c, 20), (k, 30), (x, 40)],
+AOVars = [c, k, x, a],
+ReorderedVVList = [ (c, 20), (k, 30), (x, 40), (a, 10)],
+FinalAOValues = [20, 30, 40, 10],
+LGOVars = [a, c, k, x].
+
+*/
+vvList(Poly, Values, VarValues) :-
+  variables(Poly, Vars),
+  vvList_m(Vars, Values, VarValues).
+
+vvList_m([Var], [Value], [(Var, Value)]) :-
+  atom(Var),
+  !.
+
+vvList_m([Var | Vars], [Value | Values], [(Var, Value) | VarValues]) :-
+  vvList_m(Vars, Values, VarValues).
+
+getVValues(VVList, [Var], [(Var, Value)]) :-
+  atom(Var),
+  !,
+  getValue(Var, VVList, Value).
+
+getVValues(VVList, [Var | AOVars], [(Var, Value) | AOVVars]) :-
+  getValue(Var, VVList, Value),
+  getVValues(VVList, AOVars, AOVVars).
+
+getValue(Var, [(Var, Value) | _], Value) :- !.
+getValue(Var, [(_, _) | VVList], Value) :-
+  getValue(Var, VVList, Value).
+
+stripValues([(_, Value)], [Value]) :- !.
+stripValues([(_, Value) | VValues], [Value | Values]) :-
+  stripValues(VValues, Values).

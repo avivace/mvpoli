@@ -1,4 +1,16 @@
 # Tests
+## Prolog
+#### Polytimes
+Query
+```
+polytimes 5 * x + a X another long poly gives false
+```
+
+Expected Result
+```
+-
+```
+
 
 #### Polyval
 Query
@@ -16,3 +28,5 @@ P = poly([m(1, 6, [v(6, a)]), m(5, 5, [v(2, x), v(3, y)]), m(1, 5, [v(5, z)]), m
 Vars = [a, x, y, z, j],
 Val = 5475402374.
 ```
+
+## Lisp
