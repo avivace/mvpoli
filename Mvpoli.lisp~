@@ -55,7 +55,6 @@
 
 ;;; Parsing and normalization
 
-;; da fixare : monomio non normalizzato in caso di variabili uguali
 (defun as-monomial (x) 
   (cond ((integerp x)
          (list 'm x 0 'nil))
@@ -65,10 +64,14 @@
          (if (integerp (second x))
              (let ((a (as-monomial-helper (cdr (cdr x)) 0)))         
                (list 'm (second x) (first (last a))
-                     (sort (butlast a) #' string-lessp :key #' third)))
+                    (m-normalizer 
+                     (sort (butlast a)
+                           #' string-lessp :key #' third))))
              (let ((a (as-monomial-helper (cdr x) 0)))         
                (list 'm 1 (first (last a))
-                     (sort (butlast a) #' string-lessp :key #' third)))))))
+                     (m-normalizer 
+                      (sort (butlast a) 
+                            #' string-lessp :key #' third))))))))
 
 
 (defun as-monomial-helper (x acc)
@@ -80,26 +83,21 @@
             (T (cons (list 'v (third (car x)) (second (car x)))
               (as-monomial-helper (cdr x) (+ acc (third (car x)))))))))
 
-(defun monomial-normalizer (x)
+(defun m-normalizer (x)
   (cond ((eql (car x) 'nil) 'nil)
         ((eql (cdr x) 'nil) x)
-        (T (let ((a (first x)) (b (second x)))
-             (if (eql (third a) (third b))
-                 (monomial-normalizer 
-                  (cons (list 'v (+ (second a) (second b)) (third a))
-                        (cdr x)))
-               (cons (car x) (monomial-normalizer (cdr x))))))))
+        ((eql (third (first x)) (third (second x)))
+         (let ((a (list 'v (+ (second (first x)) (second (second x)))
+                        (third (first x))))) 
+           (m-normalizer (cons a (cdr (cdr x))))))
+        (T (cons (car x) (m-normalizer (cdr x))))))
 
-(defun prova (x)
-    (if (eql (third (car x)) (third (second x)))
-        (list 'v (+ (second (first x)) (second (second x))) (third (car x)))))
-
-
-;; da fixare : i monomi devono essere ordinati lessicalmente a parità di grado       
+      
 (defun as-polynomial (x)
   (if (eql (car x) '+)
       (let ((a (as-polynomial-helper (cdr x))))
-        (list 'p (sort a #'> :key #' third)))))
+        (list 'p (sort a #'> :key #'third )))))
+
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
       (list (as-monomial (car x)))
@@ -179,14 +177,15 @@
               (monomialval-helper (cdr x) y d))))
       acc))
           
-       
-        
-
-;; var-values trova la lista var/value da usare per polyval
 (defun var-values (x y)
   (if (not (eql (car x) 'nil))
-      (cons (cons (car x) (car y)) (var-values (cdr x) (cdr y)))))
+      (cons (cons (car x) (car y)) 
+            (var-values (cdr x) (cdr y)))))
   
+(defun polyplus (x y)
+  (if (and (eql 'p (car x)) (eql 'p (car x)))
+      (list (car (cdr x)) (car (cdr y))))) 
+
 ;;printing 
 
 (defun pprint-polynomial (x)

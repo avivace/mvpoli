@@ -83,56 +83,42 @@
             (T (cons (list 'v (third (car x)) (second (car x)))
               (as-monomial-helper (cdr x) (+ acc (third (car x)))))))))
 
+
 (defun m-normalizer (x)
   (cond ((eql (car x) 'nil) 'nil)
         ((eql (cdr x) 'nil) x)
         ((eql (third (first x)) (third (second x)))
-         (let ((a (list 'v (+ (second (first x)) (second (second x)))
-                        (third (first x))))) 
-           (m-normalizer (cons a (cdr (cdr x))))))
+         (let ((a (+ (second (first x)) (second (second x)))))
+           (if (eql a 0)
+               (m-normalizer (cdr (cdr x)))
+             (m-normalizer (cons (list 'm a (third x) (varpowers x))
+                                 (cdr (cdr x)))))))
         (T (cons (car x) (m-normalizer (cdr x))))))
 
-
-
-;; da fixare : i monomi ordinati lessicalmente a parità di grado       
+      
 (defun as-polynomial (x)
   (if (eql (car x) '+)
       (let ((a (as-polynomial-helper (cdr x))))
-        (list 'p (sort a #'> :key #' third)))))
+        (list 'p (p-norm (sort a #'> :key #'third ))))))
+
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
       (list (as-monomial (car x)))
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
-      
 
-;;; Checking
-
-(defun is-monomial (m)
-  (and (listp m)
-       (eq 'm (first m))
-       (let ((mtd (monomial-degree m))
-             (vps (varpowers m))
-             )
-         (and (integerp mtd)
-              (>= mtd 0)
-              (listp vps)
-              (every #'is-varpower vps)))))
-
-(defun is-varpower (vp)
-  (and (listp vp)
-       (eq 'v (first vp))
-       (let ((p (second vp))
-             (v (third vp))
-             )
-         (and (integerp p)
-              (>= p 0)
-              (symbolp v)))))
-
-(defun is-polynomial (p)
-  (and (listp p)
-       (eq 'p (first p))
-       (let ((ms (monomials p)))
-         (and (every #'is-monomial ms)))))
+(defun p-norm (x)
+  (cond ((eql (car x) 'nil) 'nil)
+        ((eql (cdr x) 'nil) x)
+        ((and (eql (third (first x)) (third (second x)))
+              (equal (varpowers (first x)) (varpowers (second x))))
+         (let ((a (first x)) (b (second x)))
+           (if (eql (+ (second a) (second b)) 0)
+               (p-norm (cdr (cdr x)))
+             (p-norm (cons (list 'm (+ (second a) (second b))
+                                 (third a) (fourth a)) 
+                           (cdr (cdr x)))))))
+        (T (cons (car x) (p-norm (cdr x))))))
+           
 
 
 ;; polynomials' operations
@@ -178,15 +164,57 @@
               (monomialval-helper (cdr x) y d))))
       acc))
           
-       
-        
-
-;; var-values trova la lista var/value da usare per polyval
 (defun var-values (x y)
   (if (not (eql (car x) 'nil))
       (cons (cons (car x) (car y)) 
             (var-values (cdr x) (cdr y)))))
   
+(defun polyplus (x y)
+  (if (and (eql 'p (car x)) (eql 'p (car x)))
+      (let ((a (append (car (cdr x)) (car (cdr y)))))
+        (list 'p (p-norm a)))))
+
+(defun polyminus (x y)
+  (if (and (eql 'p (car x)) (eql 'p (car x)))
+      (let ((a (append (car (cdr x)) 
+                       (p-coefficientchange (car (cdr y)) (- 1)))))
+        (list 'p (p-norm a)))))
+
+(defun p-coefficientchange (x y)
+  (if (not (eql (car x) 'nil))
+      (cons (list 'm (* (second (car x)) y) 
+                  (third (car x)) (fourth (car x)))
+            (p-coefficientchange (cdr x) y))))
+
+;;; Checking
+
+(defun is-monomial (m)
+  (and (listp m)
+       (eq 'm (first m))
+       (let ((mtd (monomial-degree m))
+             (vps (varpowers m))
+             )
+         (and (integerp mtd)
+              (>= mtd 0)
+              (listp vps)
+              (every #'is-varpower vps)))))
+
+(defun is-varpower (vp)
+  (and (listp vp)
+       (eq 'v (first vp))
+       (let ((p (second vp))
+             (v (third vp))
+             )
+         (and (integerp p)
+              (>= p 0)
+              (symbolp v)))))
+
+(defun is-polynomial (p)
+  (and (listp p)
+       (eq 'p (first p))
+       (let ((ms (monomials p)))
+         (and (every #'is-monomial ms)))))
+
 ;;printing 
 
 (defun pprint-polynomial (x)
