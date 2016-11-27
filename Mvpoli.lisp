@@ -34,7 +34,7 @@
 
 
 (defun variables (x)
-  (remove-duplicates (flatten (variables-helper (second x))) :from-end t))
+  (sort (remove-duplicates (flatten (variables-helper (second x)))) #'string-lessp ))
 
 (defun coefficients (x)
   (flatten (coefficients-helper (second x))))
@@ -55,7 +55,6 @@
 
 ;;; Parsing and normalization
 
-;; da fixare : monomio non normalizzato in caso di variabili uguali
 (defun as-monomial (x) 
   (cond ((integerp x)
          (list 'm x 0 'nil))
@@ -65,10 +64,14 @@
          (if (integerp (second x))
              (let ((a (as-monomial-helper (cdr (cdr x)) 0)))         
                (list 'm (second x) (first (last a))
-                     (sort (butlast a) #' string-lessp :key #' third)))
+                    (m-normalizer 
+                     (sort (butlast a)
+                           #' string-lessp :key #' third))))
              (let ((a (as-monomial-helper (cdr x) 0)))         
                (list 'm 1 (first (last a))
-                     (sort (butlast a) #' string-lessp :key #' third)))))))
+                     (m-normalizer 
+                      (sort (butlast a) 
+                            #' string-lessp :key #' third))))))))
 
 
 (defun as-monomial-helper (x acc)
@@ -80,7 +83,18 @@
             (T (cons (list 'v (third (car x)) (second (car x)))
               (as-monomial-helper (cdr x) (+ acc (third (car x)))))))))
 
-;; da fixare : i monomi devono essere ordinati lessicalmente a parità di grado       
+(defun m-normalizer (x)
+  (cond ((eql (car x) 'nil) 'nil)
+        ((eql (cdr x) 'nil) x)
+        ((eql (third (first x)) (third (second x)))
+         (let ((a (list 'v (+ (second (first x)) (second (second x)))
+                        (third (first x))))) 
+           (m-normalizer (cons a (cdr (cdr x))))))
+        (T (cons (car x) (m-normalizer (cdr x))))))
+
+
+
+;; da fixare : i monomi ordinati lessicalmente a parità di grado       
 (defun as-polynomial (x)
   (if (eql (car x) '+)
       (let ((a (as-polynomial-helper (cdr x))))
@@ -170,7 +184,8 @@
 ;; var-values trova la lista var/value da usare per polyval
 (defun var-values (x y)
   (if (not (eql (car x) 'nil))
-      (cons (cons (car x) (car y)) (var-values (cdr x) (cdr y)))))
+      (cons (cons (car x) (car y)) 
+            (var-values (cdr x) (cdr y)))))
   
 ;;printing 
 
@@ -201,7 +216,6 @@
   
 ;; to do
 
-;; polyval
 ;; polyminus
 ;; polytimes
 ;; polyplus
