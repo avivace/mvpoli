@@ -2,4 +2,4 @@
 *.swo
 *.sh
 .mvpoli.*
-*.*~
+*.lisp~
