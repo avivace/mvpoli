@@ -433,3 +433,4 @@ getValue(Var, [(_, _) | VVList], Value) :-
 stripValues([(_, Value)], [Value]) :- !.
 stripValues([(_, Value) | VValues], [Value | Values]) :-
   stripValues(VValues, Values).
+% FIXME: initial space in lists (polytimes results)
