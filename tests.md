@@ -1,18 +1,66 @@
-# Tests
+# Testing
+## Known Problems
+#### Prolog
+  - Zero Polynomial giving wrong MaxDegree/MinDegree, not normalising
+  - MONOMIALS ARE NOT NORMALISING
 
-#### Polyval
+#### LISP
+
+## Tests
+#### Test 1
 Query
 ```
-?- as_polynomial(5*x^2*y^3 + y + z^5 + j^2 + a^6 - 42*z^3*a, P),
-variables(P, Vars),
-pprint_polynomial(P),
-polyval(P, [42, 2, 1, 22, 7], Val).
-```
+5 * x + y ^ 3 - k*x*x*x
 
+polyval in [90, 80, 40]
+```
 Expected Result
 ```
-A^6 + 5 * X^2 * Y^3 + Z^5 + -42 * A * Z^3 + J^2 + Y
-P = poly([m(1, 6, [v(6, a)]), m(5, 5, [v(2, x), v(3, y)]), m(1, 5, [v(5, z)]), m(-42, 4, [v(1, a), v(3, z)]), m(1, 2, [v(2, j)]), m(1, 1, [v(..., ...)])]),
-Vars = [a, x, y, z, j],
-Val = 5475402374.
+- 1 * X ^ 3 * K + Y ^ 3 + 5 * X
+Result = -46015600.
+
+```
+
+#### Test 2
+Query
+```
+Query
+```
+Expected Result
+```
+Expected Result
+
+```
+
+#### Test 3
+Query
+```
+Query
+```
+Expected Result
+```
+Expected Result
+
+```
+
+#### Test 4
+Query
+```
+Query
+```
+Expected Result
+```
+Expected Result
+
+```
+
+#### Test 5
+Query
+```
+Query
+```
+Expected Result
+```
+Expected Result
+
 ```
