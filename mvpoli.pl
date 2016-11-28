@@ -136,11 +136,18 @@ norm_mm([v(C1, X)], [v(C1,X)]).
 %% When monomials have the same total degree, they should be discriminated
 %% by lexicographical order.
 %
-norm_p(Ms, OMs) :-
-  sort(3, @=<, Ms, O),
-  sort(2, @>=, O, Or),
-  norm_pp(Or, OMs).
+norm_p(Monomials, NMonomials) :-
+  sort(3, @=<, Monomials, FOMonomials),
+  sort(2, @>=, FOMonomials, SOMonomials),
+  norm_pp(SOMonomials, PNSOMonolias),
+  norm_ms(PNSOMonolias, NMonomials).
 
+norm_ms([m(C, Td, Vars)], [NMonomial]) :-
+  !,
+  norm_m(m(C, Td, Vars), NMonomial).
+norm_ms([m(C, Td, Vars) | Ms], [NMonomial | NMs]) :-
+  norm_m(m(C, Td, Vars), NMonomial),
+  norm_ms(Ms, NMs).
 %%%% norm_pp/2
 %%%% norm_pp(+Monomials, -SMonomials)
 %% True when SMonomials unifies with the list of simplyfied Monomials.
@@ -164,7 +171,7 @@ norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 % CHECKING %
 
 %%%% is_monomial/1
-%%%% is_monomial(Monomial)
+%%%% is_monomial(+Monomial)
 %% True when Monomial is a valid Monomial (internal representation).
 %
 is_monomial(m(_, TD, VPs)) :-
@@ -173,7 +180,7 @@ is_monomial(m(_, TD, VPs)) :-
   is_list(VPs).
 
 %%%% is_varpower/1
-%%%% is_varpower(Var)
+%%%% is_varpower(+Var)
 %% True when Var is a valid Variable (internal representation).
 %
 is_varpower(v(Power, VarSymbol)) :-
@@ -182,7 +189,7 @@ is_varpower(v(Power, VarSymbol)) :-
   atom(VarSymbol).
 
 %%%% is_polynomial/1
-%%%% is_polynomial(Polynomial)
+%%%% is_polynomial(+Polynomial)
 %% True when Polynomial is a valid Polynomial (internal representation).
 %
 is_polynomial(poly(Monomials)) :-
@@ -285,7 +292,7 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 
 monomials(poly(Ms), Ms).
 
-maxdegree(poly([]), MinInf) :-
+maxdegree(poly([m(0, _, _)]), MinInf) :-
   !,
   MinInf is -1.
 
@@ -294,7 +301,7 @@ maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
-mixdegree(poly([]), MinInf) :-
+mindegree(poly([m(0, _, _)]), MinInf) :-
   !,
   MinInf is -1.
 
