@@ -91,15 +91,20 @@
          (let ((a (+ (second (first x)) (second (second x)))))
            (if (eql a 0)
                (m-normalizer (cdr (cdr x)))
-             (m-normalizer (cons (list 'm a (third x) (varpowers x))
+             (m-normalizer (cons (list 'v a (third (first x)))
                                  (cdr (cdr x)))))))
         (T (cons (car x) (m-normalizer (cdr x))))))
 
       
 (defun as-polynomial (x)
-  (if (eql (car x) '+)
-      (let ((a (as-polynomial-helper (cdr x))))
-        (list 'p (p-norm (sort a #'> :key #'third ))))))
+  (cond ((eql (car x) '*)
+         (let ((a (as-monomial x)))
+            (list 'p (list a))))
+        ((eql (car x) 'm)
+           (list 'p (list x)))
+        ((eql (car x) '+)
+         (let ((a (as-polynomial-helper (cdr x))))
+           (list 'p (p-norm a))))))
 
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
@@ -107,18 +112,37 @@
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
 
 (defun p-norm (x)
+  (sort (p-norm-help (sort x #'vps< :key #'fourth )) 
+                          #'> :key #'third  ))
+
+(defun p-norm-help (x)
   (cond ((eql (car x) 'nil) 'nil)
         ((eql (cdr x) 'nil) x)
         ((and (eql (third (first x)) (third (second x)))
               (equal (varpowers (first x)) (varpowers (second x))))
          (let ((a (first x)) (b (second x)))
            (if (eql (+ (second a) (second b)) 0)
-               (p-norm (cdr (cdr x)))
-             (p-norm (cons (list 'm (+ (second a) (second b))
+               (p-norm-help (cdr (cdr x)))
+             (p-norm-help (cons (list 'm (+ (second a) (second b))
                                  (third a) (fourth a)) 
                            (cdr (cdr x)))))))
-        (T (cons (car x) (p-norm (cdr x))))))
+        (T (cons (car x) (p-norm-help (cdr x))))))
            
+(defun vps< (vps1 vps2)
+  (cond ((null vps1)
+         (not (null vps2)))
+        ((null vps2)
+         nil)
+        (t
+         (let* ((vp1 (first vps1))
+                (vp2 (first vps2))
+                (v1 (third vp1))
+                (v2 (third vp2)))
+           (if (string> v1 v2)
+             (vps< (rest vps1) (rest vps2))
+             t)))))
+
+
 
 
 ;; polynomials' operations
@@ -170,21 +194,42 @@
             (var-values (cdr x) (cdr y)))))
   
 (defun polyplus (x y)
-  (if (and (eql 'p (car x)) (eql 'p (car x)))
-      (let ((a (append (car (cdr x)) (car (cdr y)))))
-        (list 'p (p-norm a)))))
-
+  (cond ((eql (car x) 'm)
+           (polyplus (as-polynomial x) y))
+        ((eql (car y) 'm)
+           (polyplus x (as-polynomial y)))
+        ((and (eql 'p (car x)) (eql 'p (car y)))
+         (let ((c (append (car (cdr x)) (car (cdr y)))))
+           (list 'p (p-norm c))))))
+       
 (defun polyminus (x y)
-  (if (and (eql 'p (car x)) (eql 'p (car x)))
-      (let ((a (append (car (cdr x)) 
-                       (p-coefficientchange (car (cdr y)) (- 1)))))
-        (list 'p (p-norm a)))))
+   (cond ((eql (car x) 'm)
+           (polyminus (as-polynomial x) y))
+        ((eql (car y) 'm)
+           (polyminus x (as-polynomial y)))
+        ((and (eql 'p (car x)) (eql 'p (car x)))
+         (let ((a (append (car (cdr x)) 
+                          (p-sgnchange (car (cdr y)) (- 1)))))
+           (list 'p (p-norm a))))))
 
-(defun p-coefficientchange (x y)
+(defun p-sgnchange (x y)
   (if (not (eql (car x) 'nil))
       (cons (list 'm (* (second (car x)) y) 
                   (third (car x)) (fourth (car x)))
             (p-coefficientchange (cdr x) y))))
+
+(defun multip (x y)
+  (if (eql (car y) 'nil)
+      (list 'm (monomial-coefficient x) (monomial-degree x) 
+            (m-normalizer (sort (varpowers x) #' string-lessp :key #' third)))
+    (let ((a (append (varpowers x) (varpowers (car y))))
+          (b (* (monomial-coefficient x) (monomial-coefficient (car y))))
+          (c (+ (monomial-degree x) (monomial-degree (car y)))))
+      (if (eql b 0)
+          (list 'm 0 0 'nil)
+        (multip (list 'm b c a) (cdr y))))))
+  
+  
 
 ;;; Checking
 
