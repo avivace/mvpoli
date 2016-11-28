@@ -1,8 +1,7 @@
 # Testing
 ## Known Problems
 #### Prolog
-  - Zero Polynomial giving wrong MaxDegree/MinDegree, not normalising
-  - MONOMIALS ARE NOT NORMALISING
+  - Polytimes still needs a cut. Unwanted backtracking
 
 #### LISP
 
@@ -32,17 +31,11 @@ poly1 = x * x + x * y + a * y
 poly2 = 3 * y + x * x
 
 polyminus: poly1 - poly2
-
-Query
 ```
 
 Expected Result
 ```
 Result = a * y + x * y - 3 * y
-
-```
-
-Expected Result
 
 ```
 
@@ -56,38 +49,41 @@ polyplus: poly1 + poly2
 ```
 
 
-Query
-```
-
-
 Expected Result
 ```
 Result = a * y + 2 * x ^ 2 + x * y + 3 * y
 
 ```
 
-Expected Result
-
-```
 
 #### Test 4
 Query
 ```
-Query
+            QUERY
 ```
 Expected Result
 ```
-Expected Result
+            EXPECTED RESULT
 
 ```
 
 #### Test 5
 Query
 ```
+            QUERY
+```
+Expected Result
+```
+            EXPECTED RESULT
+
+```
+#### Test 6
 Query
 ```
-Expected Result
+            QUERY
 ```
 Expected Result
+```
+            EXPECTED RESULT
 
 ```
