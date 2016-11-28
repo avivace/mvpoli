@@ -1,4 +1,7 @@
-%%% Antonio Vivace 793509
+%%%%% -*- Mode: Prolog -*-
+
+%%%%% mvpoli.pl --
+%%%%% Antonio Vivace 793509
 
 % PARSING %
 
@@ -131,10 +134,11 @@ norm_mm([v(C1, X)], [v(C1,X)]).
 %%%% norm_p(+Monomials, -NMonomials)
 %% True when NMonomials unifies with the list of normalised
 %% Monomials.
-%% Normalization consists in removing monomials with coefficient 0,
+%% Polynomial normalization consists in removing monomials with coefficient 0,
 %% simplifying similar monomials, and reordering them by descendant grade.
 %% When monomials have the same total degree, they should be discriminated
-%% by lexicographical order.
+%% by lexicographical order. Note that a last monomial normalisation is
+%% needed for the cases in which new monomials appears from simplifying.
 %
 norm_p(Monomials, NMonomials) :-
   sort(3, @=<, Monomials, FOMonomials),
@@ -145,9 +149,11 @@ norm_p(Monomials, NMonomials) :-
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
   norm_m(m(C, Td, Vars), NMonomial).
+
 norm_ms([m(C, Td, Vars) | Ms], [NMonomial | NMs]) :-
   norm_m(m(C, Td, Vars), NMonomial),
   norm_ms(Ms, NMs).
+
 %%%% norm_pp/2
 %%%% norm_pp(+Monomials, -SMonomials)
 %% True when SMonomials unifies with the list of simplyfied Monomials.
@@ -199,14 +205,14 @@ is_polynomial(poly(Monomials)) :-
 % PRINTING %
 
 %%%% pprint_polynomial/1
-%%%% pprint_polynomial(Poly)
+%%%% pprint_polynomial(+Poly)
 %% True when the Prolog interpreter succeds to print a human representation
 %% of Poly.
 %
 pprint_polynomial(poly(L)) :-
   pprint_pp(L).
 
-pprint_pp([]) :-
+pprint_pp(m(0, _, _)) :-
   !,
   write(0).
 
@@ -256,8 +262,14 @@ pprint_v(v(X, Y)) :-
 
 % OPERATIONS %
 
+%%%% coefficients/2
+%%%% coefficients(+Poly, -Cofficients)
+%% True when Coefficients unifies with the list of every monomial coefficient
+%% of Poly.
+%
 coefficients(poly(Ms), C) :-
   coefficients_l(Ms, C).
+
 coefficients_l([], []) :- !.
 
 coefficients_l([m(C, _, _)], [C]) :- !.
@@ -265,12 +277,22 @@ coefficients_l([m(C, _, _)], [C]) :- !.
 coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
   coefficients_l(Ms, Cs).
 
-% Lexicographically ordered variables
+%%%% variables/2
+%%%% variables(+Poly, -Vars)
+%% True when Vars unifies with the list of every Variable in Poly in a
+%% lexicographical order. Duplicates are removed (the highest 
+%% grade is kept).
+% 
 variables(P, Vars) :-
   variables_ao(P, AOVars),
   sort(0, @=<, AOVars, Vars).
 
-% Appearing ordered variables
+%%%% variables_ao/2
+%%%% variables_ao(+Poly, -Vars)
+%% True when Vars unifies with the list of every Variable in Poly in the
+%% appearing order. Duplicates are removed (the highest 
+%% grade is kept).
+% 
 variables_ao(poly(Ms), Vars) :-
   variables_m(Ms, Cd),
   list_to_set(Cd, Vars).
@@ -290,20 +312,37 @@ variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
+%%%% monomials/2
+%%%% monomials(Poly, Monomials)
+%% True when Monomials unifies with the list of every monomail in Poly.
+% 
 monomials(poly(Ms), Ms).
 
+%%%% maxdegree/2
+%%%% maxdegree(+Poly, -MaxD)
+%% True when MD unifies with the maximum degree of the monomials in Poly.
+%
 maxdegree(poly([m(0, _, _)]), MinInf) :-
   !,
   MinInf is -1.
 
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
+%%%% mindegree/2
+%%%% mindegree(+Poly, -MinD)
+%% True when MD unifies with the minimum degree of the monomials in Poly.
+%
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
 mindegree(poly([m(0, _, _)]), MinInf) :-
   !,
   MinInf is -1.
+
+%%%% polyplus/3
+%%%% polyplus(+P1, +P2, -Sum)
+%% True when Sum unifies with the polynomial sum of P1 and P2.
+%
 
 % polyplus accepts monomials too, as arguments.
 polyplus(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
@@ -325,6 +364,11 @@ polyplus(poly([m(0, _, _)]), P1, P1) :- !.
 polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
   norm_p(P3o, P3).
+
+%%%% polyplus/3
+%%%% polyplus(+P1, +P2, -Diff)
+%% True when Diff unifies with the polynomial difference of P1 and P2.
+%
 
 % polyminus accepts monomials too, as arguments.
 polyminus(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
@@ -356,13 +400,22 @@ poly_ii([M], [Om]) :-
 monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
   Ci is -C.
 
+%%%% monotimes/3
+%%%% monotimes(+Mono1, +Mono2, -MonoProduct)
+%% True when MonoProduct unifies with the monomial product 
+%% of Mono1 and Mono2.
+%
 monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), m(C3, Td3, Vars3n)) :-
   C3 is C1 * C2,
   Td3 is Td1 + Td2,
   append(Vars1, Vars2, Vars3),
   norm_m(m(C3, Td3, Vars3), m(C3, Td3, Vars3n)).
 
-
+%%%% polytimes/3
+%%%% polytimes(+Poly1, +Poly2, -PolyProduct)
+%% True when PolyProduct unifies with the polynomial product 
+%% of Poly1 and Poly2
+%
 % Polytimes accepts monomials too, as arguments.
 polytimes(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
   !,
@@ -396,6 +449,11 @@ polytimes_m(M1s, [M2 | M2s], [R | Rs]) :-
   polymono(M1s, M2, R),
   polytimes_m(M1s, M2s, Rs).
 
+%%%% polymono/3
+%%%% polymono(+Poly, +Mono, -PMProduct)
+%% True when PMProduct unifies with the polynomial product of 
+%% polynomial Poly and monomial Mono.
+%
 polymono([m(C1, Td1, Vars1)], m(C2, Td2, Vars2), R) :-
   !,
   monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), R).
@@ -404,6 +462,14 @@ polymono([M | Ms], M2, [R | Rs]) :-
   monotimes(M, M2, R),
   polymono(Ms, M2, Rs).
 
+
+%%%% polyval/3
+%%%% polyval(Poly, Values, Result)
+%% True when Result unifies with the computation of Poly using Values
+%% for the variables appearing in Poly.
+%% Values is a list of integers associating with the list variables
+%% (lexicographical order).
+%
 polyval(Poly, InputValues, Result) :-
   vvList(Poly, InputValues, VVList),
   variables_ao(Poly, AOVars),
@@ -441,3 +507,5 @@ stripValues([(_, Value)], [Value]) :- !.
 stripValues([(_, Value) | VValues], [Value | Values]) :-
   stripValues(VValues, Values).
 % FIXME: initial space in lists (polytimes results)
+
+%%%%% end of file -- mvpoli.pl --
