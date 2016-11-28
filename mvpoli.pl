@@ -321,30 +321,15 @@ polymono([M | Ms], M2, [R | Rs]) :-
   monotimes(M, M2, R),
   polymono(Ms, M2, Rs).
 
-% TODO
-polyval(Poly, Values, Result) :-
+polyval(Poly, InputValues, Result) :-
+  vvList(Poly, InputValues, VVList),
+  variables_ao(Poly, AOVars),
+  getVValues(VVList, AOVars, AOVVars),
+  stripValues(AOVVars, AOInputValues),
   with_output_to(string(PPoly), pprint_polynomial(Poly)),
-  term_string(Term, PPoly, [variables(Values)]),
+  term_string(Term, PPoly, [variables(AOInputValues)]),
   Result is Term.
 
-/*
-
-?- as_polynomial(x^2 + a + k^4 * c, P1),
-vvList(P1, InputList, VVList),
-variables_ao(P1, AOVars),
-getVValues(VVList, AOVars, ReorderedVVList),
-stripValues(ReorderedVVList, FinalAOValues),
-InputList = [10, 20, 30, 40],
-|    variables(P1, LGOVars).
-P1 = poly([m(1, 5, [v(1, c), v(4, k)]), m(1, 2, [v(2, x)]), m(1, 1, [v(1, a)])]),
-InputList = [10, 20, 30, 40],
-VVList = [ (a, 10), (c, 20), (k, 30), (x, 40)],
-AOVars = [c, k, x, a],
-ReorderedVVList = [ (c, 20), (k, 30), (x, 40), (a, 10)],
-FinalAOValues = [20, 30, 40, 10],
-LGOVars = [a, c, k, x].
-
-*/
 vvList(Poly, Values, VarValues) :-
   variables(Poly, Vars),
   vvList_m(Vars, Values, VarValues).
