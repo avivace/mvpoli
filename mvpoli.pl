@@ -5,7 +5,7 @@
 
 % PARSING %
 
-%%%% as_polynomial/2
+%%%% as_polynomial(+Expression, -Poly)
 %% True when poly(Monomials) unifies with the internal representation
 %% of the normalised polynomial.
 %
@@ -13,7 +13,7 @@ as_polynomial(Input, poly(Monomials)) :-
   as_polynomial_p(Input, RawMonomials),
   norm_p(RawMonomials, Monomials).
 
-%%%% as_monomial/2
+%%%% as_monomial(+Expression, -Monomial)
 %% True when Monomial unifies with the internal representation
 %% of the normalised monomial.
 %
@@ -22,7 +22,6 @@ as_monomial(Input, Monomial) :-
   td(Vd, TD),
   norm_m(m(C, TD, Vd), Monomial).
 
-%%%% as_polynomial/2
 %%%% as_polynomial(+Expression, -Monomials)
 %% True when Monomials unifies with the list of the Input
 %% monomials.
@@ -40,8 +39,6 @@ as_polynomial_p(X - Y, [M | Ms]) :-
 as_polynomial_p(X, [M]) :-
   as_monomial(X, M).
 
-
-%%%% as_monomial_i/2
 %%%% as_monomial_i(-Mono1, +Mono2)
 %% True when Mono1 unifies with the opposite of Mono2.
 %
@@ -50,10 +47,6 @@ as_monomial_i(X, m(OC, TD, Vs)) :-
   OC is -C,
   td(Vs, TD).
 
-%%%% as_monomial/2
-%% True when Monomial unifies with the internal representation
-%% of the monomial.
-%
 as_monomial_p(X, X, []) :-
   number(X),
   !.
@@ -61,30 +54,29 @@ as_monomial_p(X, X, []) :-
 as_monomial_p(X * Y, C, [V | Vs]) :-
   as_monomial_p(X, C, Vs),
   !,
-  asvar(Y, V).
+  as_var(Y, V).
 
 as_monomial_p(X, 1, [V]) :-
-  asvar(X, V).
+  as_var(X, V).
 
 % FIXME variables/atom question
-%%%% asvar/2
-%%%% asvar(+Expression, -Var)
+
+%%%% as_var(+Expression, -Var)
 %% True when Var unifies with v(N, X) where N is the exponent and
 %% X the atom representing the variable.
 %
-asvar(X ^ N, v(N, X)) :-
+as_var(X ^ N, v(N, X)) :-
   integer(N),
   !,
   N >= 0.
 
-asvar(X ^ N, v(N, X)) :-
+as_var(X ^ N, v(N, X)) :-
   atom(N),
   !.
 
-asvar(X, v(1, X)) :-
+as_var(X, v(1, X)) :-
   atom(X).
 
-%%%% td/2
 %%%% td(+VarList, -N)
 %% True when N unifies with the sum of the grade of
 %% every variable in VarList
@@ -100,11 +92,8 @@ td([], 0).
 
 % NORMALISATION %
 
-%%%% norm_m/2
 %%%% norm_m(+Mono1, -Mono2)
 %% True when Mono2 unifies with Mono1 normalised.
-%% The monomial normalisation consists in simplifying the monomial
-%% and reordering its variables in a lexicographical order.
 %
 norm_m(m(C, Td, []), m(C, Td, [])) :- !.
 norm_m(m(0, _, _), m(0, 0, [])) :- !.
@@ -114,7 +103,6 @@ norm_m(m(C, G, X), m(C, G, O)) :-
   sort(2, @=<, X, SX),
   norm_mm(SX, O).
 
-%%%% norm_mm/2
 %%%% norm_mm(+VarList1, -VarList2)
 %% True when VarList2 unifies with VarList1 simplified.
 %
@@ -130,15 +118,9 @@ norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
 
 norm_mm([v(C1, X)], [v(C1,X)]).
 
-%%%% norm_p/2
 %%%% norm_p(+Monomials, -NMonomials)
 %% True when NMonomials unifies with the list of normalised
 %% Monomials.
-%% Polynomial normalization consists in removing monomials with coefficient 0,
-%% simplifying similar monomials, and reordering them by descendant grade.
-%% When monomials have the same total degree, they should be discriminated
-%% by lexicographical order. Note that a last monomial normalisation is
-%% needed for the cases in which new monomials appears from simplifying.
 %
 norm_p(Monomials, NMonomials) :-
   sort(3, @=<, Monomials, FOMonomials),
@@ -239,7 +221,7 @@ pprint_m(m(X, _, L)) :-
   pprint_mm(L).
 
 pprint_mm([L]) :-
-  asvar(_, L),
+  as_var(_, L),
   !,
   pprint_v(L).
 
@@ -312,13 +294,11 @@ variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
-%%%% monomials/2
 %%%% monomials(Poly, Monomials)
 %% True when Monomials unifies with the list of every monomail in Poly.
 % 
 monomials(poly(Ms), Ms).
 
-%%%% maxdegree/2
 %%%% maxdegree(+Poly, -MaxD)
 %% True when MD unifies with the maximum degree of the monomials in Poly.
 %
@@ -328,7 +308,6 @@ maxdegree(poly([m(0, _, _)]), MinInf) :-
 
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
-%%%% mindegree/2
 %%%% mindegree(+Poly, -MinD)
 %% True when MD unifies with the minimum degree of the monomials in Poly.
 %
@@ -339,7 +318,6 @@ mindegree(poly([m(0, _, _)]), MinInf) :-
   !,
   MinInf is -1.
 
-%%%% polyplus/3
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
 %
@@ -365,7 +343,6 @@ polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
   norm_p(P3o, P3).
 
-%%%% polyplus/3
 %%%% polyplus(+P1, +P2, -Diff)
 %% True when Diff unifies with the polynomial difference of P1 and P2.
 %
@@ -400,7 +377,6 @@ poly_ii([M], [Om]) :-
 monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
   Ci is -C.
 
-%%%% monotimes/3
 %%%% monotimes(+Mono1, +Mono2, -MonoProduct)
 %% True when MonoProduct unifies with the monomial product 
 %% of Mono1 and Mono2.
@@ -411,7 +387,6 @@ monotimes(m(C1, Td1, Vars1), m(C2, Td2, Vars2), m(C3, Td3, Vars3n)) :-
   append(Vars1, Vars2, Vars3),
   norm_m(m(C3, Td3, Vars3), m(C3, Td3, Vars3n)).
 
-%%%% polytimes/3
 %%%% polytimes(+Poly1, +Poly2, -PolyProduct)
 %% True when PolyProduct unifies with the polynomial product 
 %% of Poly1 and Poly2
@@ -449,7 +424,6 @@ polytimes_m(M1s, [M2 | M2s], [R | Rs]) :-
   polymono(M1s, M2, R),
   polytimes_m(M1s, M2s, Rs).
 
-%%%% polymono/3
 %%%% polymono(+Poly, +Mono, -PMProduct)
 %% True when PMProduct unifies with the polynomial product of 
 %% polynomial Poly and monomial Mono.
@@ -463,7 +437,6 @@ polymono([M | Ms], M2, [R | Rs]) :-
   polymono(Ms, M2, Rs).
 
 
-%%%% polyval/3
 %%%% polyval(Poly, Values, Result)
 %% True when Result unifies with the computation of Poly using Values
 %% for the variables appearing in Poly.
@@ -479,6 +452,9 @@ polyval(Poly, InputValues, Result) :-
   term_string(Term, PPoly, [variables(AOInputValues)]),
   Result is Term.
 
+%%%% vvList(+Poly, +Values, -VarValues)
+%% True when VarValues unifies with a list of (Var, Value) pairs.
+%
 vvList(Poly, Values, VarValues) :-
   variables(Poly, Vars),
   vvList_m(Vars, Values, VarValues).
@@ -490,6 +466,10 @@ vvList_m([Var], [Value], [(Var, Value)]) :-
 vvList_m([Var | Vars], [Value | Values], [(Var, Value) | VarValues]) :-
   vvList_m(Vars, Values, VarValues).
 
+%%%% getVValues(+VVList, +Variables, -ReorderedVVList)
+%% True when ReorderedVVList unifies with a reordered version of VVList,
+%% where VVList is a list of (Var, Value) pairs.
+% 
 getVValues(VVList, [Var], [(Var, Value)]) :-
   atom(Var),
   !,

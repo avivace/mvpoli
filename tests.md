@@ -1,7 +1,7 @@
 # Testing
 ## Known Problems
 #### Prolog
-  - Polytimes still needs a cut. Unwanted backtracking
+  - Polytimes still needs a cut. Unwanted backtracking (When?)
 
 #### LISP
 
