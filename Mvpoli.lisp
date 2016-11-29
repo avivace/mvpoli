@@ -1,3 +1,14 @@
+(defun flatten (l)
+  (cond ((null l) nil)
+        ((atom l) (list l))
+        (t (loop for a in l appending (flatten a)))))
+
+(defun var-of-helper (x)
+  (if (eql 'nil (cdr x))
+      (third (car x))
+      (list (third (car x)) (var-of-helper (cdr x)))))
+
+
 ;; Ispetioning monomials
 
 (defun monomial-degree (x)
@@ -13,20 +24,10 @@
   (let ((a (varpowers x)))
     (flatten (var-of-helper a))))
 
-(defun var-of-helper (x)
-  (if (eql 'nil (cdr x))
-      (third (car x))
-      (list (third (car x)) (var-of-helper (cdr x)))))
-
 ;;; Ispetioning polynomials 
 
 (defun monomials (x)
   (second x))
-
-(defun flatten (l)
-  (cond ((null l) nil)
-        ((atom l) (list l))
-        (t (loop for a in l appending (flatten a)))))
 
 (defun variables-helper (x)
   (if (not (eql '() x))
