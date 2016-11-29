@@ -1,3 +1,8 @@
+;;;; 793307 Trovato Gaetano
+;;;; 793509 Vivace Antonio
+ 
+
+
 (defun flatten (l)
   (cond ((null l) nil)
         ((atom l) (list l))
@@ -314,9 +319,5 @@
                (prin1 (second a))))
         (pprint-monomial-helper (cdr x)))))
   
-;; to do
 
-;; polyminus
-;; polytimes
-;; polyplus
 
