@@ -18,7 +18,7 @@
       (third (car x))
       (list (third (car x)) (var-of-helper (cdr x)))))
 
-;;; Ispetioning polynomials
+;;; Ispetioning polynomials 
 
 (defun monomials (x)
   (second x))
@@ -64,14 +64,10 @@
          (if (integerp (second x))
              (let ((a (as-monomial-helper (cdr (cdr x)) 0)))         
                (list 'm (second x) (first (last a))
-                    (m-normalizer 
-                     (sort (butlast a)
-                           #' string-lessp :key #' third))))
+                    (m-norm (butlast a))))
              (let ((a (as-monomial-helper (cdr x) 0)))         
                (list 'm 1 (first (last a))
-                     (m-normalizer 
-                      (sort (butlast a) 
-                            #' string-lessp :key #' third))))))))
+                     (m-norm (butlast a))))))))
 
 
 (defun as-monomial-helper (x acc)
@@ -83,6 +79,9 @@
             (T (cons (list 'v (third (car x)) (second (car x)))
               (as-monomial-helper (cdr x) (+ acc (third (car x)))))))))
 
+(defun m-norm (x)
+  (m-normalizer (sort (copy-seq x) 
+                            #' string-lessp :key #' third)))
 
 (defun m-normalizer (x)
   (cond ((eql (car x) 'nil) 'nil)
@@ -114,8 +113,8 @@
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
 
 (defun p-norm (x)
-  (sort (p-norm-help (sort x #'vps< :key #'fourth )) 
-                          #'> :key #'third  ))
+  (sort (copy-seq (p-norm-help 
+                   (sort (copy-seq x) #'vps< :key #'fourth))) #'> :key #'third))
 
 (defun p-norm-help (x)
   (cond ((eql (car x) 'nil) 'nil)
@@ -130,6 +129,7 @@
                            (cdr (cdr x)))))))
         (T (cons (car x) (p-norm-help (cdr x))))))
            
+
 (defun vps< (vps1 vps2)
   (cond ((null vps1)
          (not (null vps2)))
@@ -143,7 +143,6 @@
            (if (string> v1 v2)
              (vps< (rest vps1) (rest vps2))
              t)))))
-
 
 
 
@@ -229,8 +228,7 @@
  
 (defun polytimes-helper2 (x y)
   (cond ((eql (car y) 'nil)
-         (let ((a (m-normalizer 
-                   (sort (varpowers x) #' string-lessp :key #' third))))
+         (let ((a (m-norm (varpowers x))))
            (list 'm (monomial-coefficient x) (monomial-degree x) a)))
         (T (let ((a (append (varpowers x) (varpowers (car y))))
               (b (* (monomial-coefficient x) (monomial-coefficient (car y))))

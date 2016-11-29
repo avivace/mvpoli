@@ -18,7 +18,7 @@
       (third (car x))
       (list (third (car x)) (var-of-helper (cdr x)))))
 
-;;; Ispetioning polynomials
+;;; Ispetioning polynomials 
 
 (defun monomials (x)
   (second x))
@@ -53,7 +53,7 @@
   (if (not (eql '() x))
       (cons (monomial-degree (car x)) (poly-degrees (cdr x)))))
 
-;;; Parsing and normalization
+;;; Parsing and normalization monomial
 
 (defun as-monomial (x) 
   (cond ((integerp x)
@@ -95,7 +95,9 @@
                                  (cdr (cdr x)))))))
         (T (cons (car x) (m-normalizer (cdr x))))))
 
-      
+;; Parsing and normalization polynomials
+
+; A monomial is also a polynomial   
 (defun as-polynomial (x)
   (cond ((eql (car x) '*)
          (let ((a (as-monomial x)))
@@ -112,8 +114,9 @@
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
 
 (defun p-norm (x)
-  (sort (p-norm-help (sort x #'vps< :key #'fourth )) 
-                          #'> :key #'third  ))
+  (sort (p-norm-help (sort x #'vps< :key #'fourth)) #'> :key #'third))
+
+;;(sort x #'vps< :key #'fourth ))
 
 (defun p-norm-help (x)
   (cond ((eql (car x) 'nil) 'nil)
@@ -128,6 +131,7 @@
                            (cdr (cdr x)))))))
         (T (cons (car x) (p-norm-help (cdr x))))))
            
+
 (defun vps< (vps1 vps2)
   (cond ((null vps1)
          (not (null vps2)))
@@ -144,9 +148,9 @@
 
 
 
-
 ;; polynomials' operations
 
+;; accepts polynomials and monomials even not structured
 (defun polyval (x y)
   (cond ((eql (first x) 'p)
          (polyval-helper1 x y))
@@ -194,7 +198,9 @@
             (var-values (cdr x) (cdr y)))))
   
 (defun polyplus (x y)
-  (cond ((eql (car x) 'm)
+  (cond ((eql x 0) y)
+        ((eql y 0) x)
+        ((eql (car x) 'm)
            (polyplus (as-polynomial x) y))
         ((eql (car y) 'm)
            (polyplus x (as-polynomial y)))
@@ -203,33 +209,52 @@
            (list 'p (p-norm c))))))
        
 (defun polyminus (x y)
-   (cond ((eql (car x) 'm)
-           (polyminus (as-polynomial x) y))
-        ((eql (car y) 'm)
-           (polyminus x (as-polynomial y)))
-        ((and (eql 'p (car x)) (eql 'p (car x)))
-         (let ((a (append (car (cdr x)) 
-                          (p-sgnchange (car (cdr y)) (- 1)))))
-           (list 'p (p-norm a))))))
+   (cond ((eql y 0) x)
+         ((eql x 0) 
+          (list 'p (p-sgnchange (car (cdr y)) (- 1))))
+         ((eql (car x) 'm)
+          (polyminus (as-polynomial x) y))
+         ((eql (car y) 'm)
+          (polyminus x (as-polynomial y)))
+         ((and (eql 'p (car x)) (eql 'p (car x)))
+          (let ((a (append (car (cdr x)) 
+                           (p-sgnchange (car (cdr y)) (- 1)))))
+            (list 'p (p-norm a))))))
 
 (defun p-sgnchange (x y)
   (if (not (eql (car x) 'nil))
       (cons (list 'm (* (second (car x)) y) 
                   (third (car x)) (fourth (car x)))
-            (p-coefficientchange (cdr x) y))))
+            (p-sgnchange (cdr x) y))))
+ 
+ 
+(defun polytimes-helper2 (x y)
+  (cond ((eql (car y) 'nil)
+         (let ((a (m-normalizer 
+                   (sort (varpowers x) #' string-lessp :key #' third))))
+           (list 'm (monomial-coefficient x) (monomial-degree x) a)))
+        (T (let ((a (append (varpowers x) (varpowers (car y))))
+              (b (* (monomial-coefficient x) (monomial-coefficient (car y))))
+              (c (+ (monomial-degree x) (monomial-degree (car y)))))
+             (if (eql b 0)
+                 (list 'm 0 0 'nil)
+               (polytimes-helper2 (list 'm b c a) (cdr y)))))))
 
-(defun multip (x y)
-  (if (eql (car y) 'nil)
-      (list 'm (monomial-coefficient x) (monomial-degree x) 
-            (m-normalizer (sort (varpowers x) #' string-lessp :key #' third)))
-    (let ((a (append (varpowers x) (varpowers (car y))))
-          (b (* (monomial-coefficient x) (monomial-coefficient (car y))))
-          (c (+ (monomial-degree x) (monomial-degree (car y)))))
-      (if (eql b 0)
-          (list 'm 0 0 'nil)
-        (multip (list 'm b c a) (cdr y))))))
-  
-  
+(defun polytimes-helper1 (x y)
+  (if (eql (car x) 'nil)
+      'nil
+      (let ((a (polytimes-helper2 (car x) y)))
+      (cons a (polytimes-helper1 (cdr x) y)))))
+ 
+(defun polytimes (x y)
+  (cond ((eql x 1) y)
+        ((eql y 1) x)
+        ((or (eql x 0) (eql y 0))
+         (list 'm 0 0 'nil))
+        (T (list 'p (p-norm (polytimes-helper1 
+                             (monomials x)
+                             (monomials y)))))))
+
 
 ;;; Checking
 
