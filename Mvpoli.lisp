@@ -249,6 +249,10 @@
         ((eql y 1) x)
         ((or (eql x 0) (eql y 0))
          (list 'm 0 0 'nil))
+        ((eql (car x) 'm)
+           (polytimes (as-polynomial x) y))
+        ((eql (car y) 'm)
+           (polytimes x (as-polynomial y)))
         (T (list 'p (p-norm (polytimes-helper1 
                              (monomials x)
                              (monomials y)))))))
