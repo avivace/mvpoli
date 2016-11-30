@@ -232,21 +232,23 @@
  
  
 (defun polytimes-helper2 (x y)
-  (cond ((eql (car y) 'nil)
-         (let ((a (m-norm (varpowers x))))
-           (list 'm (monomial-coefficient x) (monomial-degree x) a)))
+  (cond ((eql (car y) 'nil) nil)
+        ;; (let ((a (m-norm (varpowers x))))
+        ;;   (list 'm (monomial-coefficient x) (monomial-degree x) a)))
         (T (let ((a (append (varpowers x) (varpowers (car y))))
-              (b (* (monomial-coefficient x) (monomial-coefficient (car y))))
+              (b (* (monomial-coefficient x) 
+                    (monomial-coefficient (car y))))
               (c (+ (monomial-degree x) (monomial-degree (car y)))))
              (if (eql b 0)
-                 (list 'm 0 0 'nil)
-               (polytimes-helper2 (list 'm b c a) (cdr y)))))))
+                 (list (list 'm 0 0 'nil))
+               (cons (list 'm b c (m-norm a)) 
+                     (polytimes-helper2 x (cdr y))))))))
 
 (defun polytimes-helper1 (x y)
   (if (eql (car x) 'nil)
       'nil
       (let ((a (polytimes-helper2 (car x) y)))
-      (cons a (polytimes-helper1 (cdr x) y)))))
+      (append a (polytimes-helper1 (cdr x) y)))))
  
 (defun polytimes (x y)
   (cond ((eql x 1) y)
