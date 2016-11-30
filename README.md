@@ -1,1 +1,1 @@
-# Multivariate Polynomials
+# Multivariate polynomials
