@@ -146,10 +146,9 @@
                 (vp2 (first vps2))
                 (v1 (third vp1))
                 (v2 (third vp2)))
-           (if (string> v1 v2)
+           (if (eq v1 v2)
              (vps< (rest vps1) (rest vps2))
-             t)))))
-
+             (string< v1 v2))))))
 
 
 ;; polynomials' operations
