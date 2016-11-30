@@ -403,9 +403,10 @@ polytimes(poly([m(0,_, _)]), _, poly([m(0, 0, [])])) :- !.
 polytimes(A, poly([m(1, _, [])]), A) :- !.
 polytimes(poly([m(1, _, [])]), A, A) :- !.
 
-polytimes(poly(M1s), poly(M2s), poly(ResultF)) :-
+polytimes(poly(M1s), poly(M2s), poly(ResultN)) :-
   polytimes_m(M1s, M2s, Result),
-  flatten(Result, ResultF).
+  flatten(Result, ResultF),
+  norm_p(ResultF, ResultN).
 
 polytimes_m(M1s, [m(C, Td, Vars)], R) :-
   !,

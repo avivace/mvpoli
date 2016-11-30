@@ -59,8 +59,9 @@ RESULT
 #### Test 5
 ```
 QUERY
-something
+poly1 = x + y
+polytimes(poly1, poly1)
 
 RESULT
-something
+2 * X * Y + X^2 + Y^2
 ```
