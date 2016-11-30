@@ -54,6 +54,7 @@ polytimes(poly1, poly2)
 
 RESULT
 -6 * A^3 * U^10 * Z + 8 * U^10 + -6 * A^3 * I * Z + -84 * A^3 * Z + 8 * I + 112
+-6 * A^3 * U^10 * Z + 8 * U^10 + -6 * A^3 * I * Z + -84 * A^3 * Z + 8 * I + 112 Lisp result
 ```
 
 #### Test 5
@@ -63,7 +64,8 @@ poly1 = x + y
 polytimes(poly1, poly1)
 
 RESULT
-X^2 + 2 * X * Y  + Y^2
+2 * X * Y + X^2 + + Y^2
+X^2 + 2 * X * Y + Y^2 Lisp result
 ```
 
 #### Test 6
