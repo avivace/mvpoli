@@ -65,3 +65,13 @@ polytimes(poly1, poly1)
 RESULT
 2 * X * Y + X^2 + Y^2
 ```
+
+#### Test 6
+```
+QUERY
+poly1 = x^3 + x^2 + x*y^3 - 2*x^2 - x^3 + 5*x*y^3 + o + l
+polytimes(poly1, poly1)
+
+RESULT
+36 * X^2 * Y^6 + -12 * X^3 * Y^3 + 12 * L * X * Y^3 + 12 * O * X * Y^3 + X^4 + -2 * L * X^2 + -2 * O * X^2 + 2 * L * O + L^2 + O^2
+```
