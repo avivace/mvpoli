@@ -1,7 +1,8 @@
 %%%%% -*- Mode: Prolog -*-
 
 %%%%% mvpoli.pl --
-%%%%% Antonio Vivace 793509
+%%%%% 793307 Trovato Gaetano
+%%%%% 793509 Vivace Antonio
 
 % PARSING %
 
@@ -58,8 +59,6 @@ as_monomial_p(X * Y, C, [V | Vs]) :-
 
 as_monomial_p(X, 1, [V]) :-
   as_var(X, V).
-
-% FIXME variables/atom question
 
 %%%% as_var(+Expression, -Var)
 %% True when Var unifies with v(N, X) where N is the exponent and
@@ -136,7 +135,6 @@ norm_ms([m(C, Td, Vars) | Ms], [NMonomial | NMs]) :-
   norm_m(m(C, Td, Vars), NMonomial),
   norm_ms(Ms, NMs).
 
-%%%% norm_pp/2
 %%%% norm_pp(+Monomials, -SMonomials)
 %% True when SMonomials unifies with the list of simplyfied Monomials.
 %
@@ -158,7 +156,6 @@ norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 
 % CHECKING %
 
-%%%% is_monomial/1
 %%%% is_monomial(+Monomial)
 %% True when Monomial is a valid Monomial (internal representation).
 %
@@ -167,7 +164,6 @@ is_monomial(m(_, TD, VPs)) :-
   TD >= 0,
   is_list(VPs).
 
-%%%% is_varpower/1
 %%%% is_varpower(+Var)
 %% True when Var is a valid Variable (internal representation).
 %
@@ -176,7 +172,6 @@ is_varpower(v(Power, VarSymbol)) :-
   Power >= 0,
   atom(VarSymbol).
 
-%%%% is_polynomial/1
 %%%% is_polynomial(+Polynomial)
 %% True when Polynomial is a valid Polynomial (internal representation).
 %
@@ -186,7 +181,6 @@ is_polynomial(poly(Monomials)) :-
 
 % PRINTING %
 
-%%%% pprint_polynomial/1
 %%%% pprint_polynomial(+Poly)
 %% True when the Prolog interpreter succeds to print a human representation
 %% of Poly.
@@ -244,7 +238,6 @@ pprint_v(v(X, Y)) :-
 
 % OPERATIONS %
 
-%%%% coefficients/2
 %%%% coefficients(+Poly, -Cofficients)
 %% True when Coefficients unifies with the list of every monomial coefficient
 %% of Poly.
@@ -259,7 +252,6 @@ coefficients_l([m(C, _, _)], [C]) :- !.
 coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
   coefficients_l(Ms, Cs).
 
-%%%% variables/2
 %%%% variables(+Poly, -Vars)
 %% True when Vars unifies with the list of every Variable in Poly in a
 %% lexicographical order. Duplicates are removed (the highest 
@@ -269,7 +261,6 @@ variables(P, Vars) :-
   variables_ao(P, AOVars),
   sort(0, @=<, AOVars, Vars).
 
-%%%% variables_ao/2
 %%%% variables_ao(+Poly, -Vars)
 %% True when Vars unifies with the list of every Variable in Poly in the
 %% appearing order. Duplicates are removed (the highest 
@@ -294,7 +285,7 @@ variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
-%%%% monomials(Poly, Monomials)
+%%%% monomials(+Poly, -Monomials)
 %% True when Monomials unifies with the list of every monomail in Poly.
 % 
 monomials(poly(Ms), Ms).
@@ -437,7 +428,7 @@ polymono([M | Ms], M2, [R | Rs]) :-
   polymono(Ms, M2, Rs).
 
 
-%%%% polyval(Poly, Values, Result)
+%%%% polyval(+Poly, +Values, -Result)
 %% True when Result unifies with the computation of Poly using Values
 %% for the variables appearing in Poly.
 %% Values is a list of integers associating with the list variables
@@ -486,6 +477,5 @@ getValue(Var, [(_, _) | VVList], Value) :-
 stripValues([(_, Value)], [Value]) :- !.
 stripValues([(_, Value) | VValues], [Value | Values]) :-
   stripValues(VValues, Values).
-% FIXME: initial space in lists (polytimes results)
 
 %%%%% end of file -- mvpoli.pl --
