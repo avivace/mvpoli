@@ -126,6 +126,9 @@ norm_p(Monomials, NMonomials) :-
   sort(2, @>=, FOMonomials, SOMonomials),
   norm_pp(SOMonomials, PNSOMonolias),
   norm_ms(PNSOMonolias, NMonomials).
+  %sort(3, @<=, NMonomials, FOMonomials_1),
+  %sort(2, @>=, FOMonomials_1, SOMonomials_1).
+
 
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
