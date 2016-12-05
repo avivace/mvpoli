@@ -10,7 +10,6 @@
 %   ! Ordering (toString, 2 sorts?)
 %
 
-
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
