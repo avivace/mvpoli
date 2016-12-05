@@ -1,14 +1,4 @@
-# Testing
-## Known Problems
-#### Prolog
-  - Polytimes still needs a cut. Unwanted backtracking (When?)
-  - Initial spaces in lists (polytimes results)
-  - Variables/atom question. Current situation: `a*a =/= aa` and both accepted as variables.
-
-#### LISP
-
-
-## Tests
+# Tests
 
 #### Test 1
 ```
