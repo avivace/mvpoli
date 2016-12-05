@@ -4,6 +4,13 @@
 %%%%% 793307 Trovato Gaetano
 %%%%% 793509 Vivace Antonio
 
+%% TODO
+%   MaxDegree(polynomial 0) = 0 (MinDegree?)
+%   Polynomial-0 representation (Another clause or?)
+%   ! Ordering (toString, 2 sorts?)
+%
+
+
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
