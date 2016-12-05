@@ -5,10 +5,11 @@
 %%%%% 793509 Vivace Antonio
 
 %% TODO
-%   MaxDegree(polynomial 0) = 0 (MinDegree?)
-%   Polynomial-0 representation (Another clause or?)
 %   ! Ordering (toString, 2 sorts?)
 %
+%% FIXME
+%  - Polytimes still needs a cut. Unwanted backtracking (When?)
+%  - Initial spaces in lists (polytimes results)
 
 % PARSING %
 
@@ -147,6 +148,10 @@ norm_ms([m(C, Td, Vars) | Ms], [NMonomial | NMs]) :-
 %%%% norm_pp(+Monomials, -SMonomials)
 %% True when SMonomials unifies with the list of simplyfied Monomials.
 %
+norm_pp([m(C2, S2, Y), m(0, _, _) | Ms], MMs) :-
+  !,
+  norm_pp([m(C2, S2, Y) | Ms], MMs).
+
 norm_pp([m(0, _, _), m(C2, S2, Y) | Ms], MMs) :-
   !,
   norm_pp([m(C2, S2, Y) | Ms], MMs).
@@ -302,9 +307,7 @@ monomials(poly(Ms), Ms).
 %%%% maxdegree(+Poly, -MaxD)
 %% True when MD unifies with the maximum degree of the monomials in Poly.
 %
-maxdegree(poly([m(0, _, _)]), MinInf) :-
-  !,
-  MinInf is -1.
+maxdegree(poly([m(0, _, _)]), 0).
 
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
@@ -314,9 +317,7 @@ maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
-mindegree(poly([m(0, _, _)]), MinInf) :-
-  !,
-  MinInf is -1.
+mindegree(poly([m(0, _, _)]), 0).
 
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
