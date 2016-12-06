@@ -308,6 +308,7 @@ monomials(poly(Ms), Ms).
 %% True when MD unifies with the maximum degree of the monomials in Poly.
 %
 maxdegree(poly([m(0, _, _)]), 0).
+maxdegree(poly([]), 0) :- !.
 
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
 
@@ -318,6 +319,7 @@ mindegree(poly(Ms), MinD) :-
   reverse(Ms, ([m(_, MinD, _) | _])).
 
 mindegree(poly([m(0, _, _)]), 0).
+mindegree(poly([]), 0) :- !.
 
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
@@ -339,6 +341,8 @@ polyplus(poly(P), m(C, Td, Vars), Result) :-
 % 0 is neutral for polyplus (and polyminus)
 polyplus(P1, poly([m(0, _, _)]), P1) :- !.
 polyplus(poly([m(0, _, _)]), P1, P1) :- !.
+polyplus(P1, poly([]), P1) :- !.
+polyplus(poly([]), P1, P1) :- !.
 
 polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
@@ -408,6 +412,8 @@ polytimes(poly(P), m(C, Td, Vars), Result) :-
 % 0 is absorbing for polytimes
 polytimes(_, poly([m(0, _, _)]), poly([m(0, 0, [])])) :- !.
 polytimes(poly([m(0,_, _)]), _, poly([m(0, 0, [])])) :- !.
+polytimes(_, poly([]), poly([m(0, 0, [])])) :- !.
+polytimes(poly([]), _, poly([m(0, 0, [])])) :- !.
 
 % 1 is neutral for polytimes
 polytimes(A, poly([m(1, _, [])]), A) :- !.
