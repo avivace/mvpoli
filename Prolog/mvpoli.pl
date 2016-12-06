@@ -324,6 +324,11 @@ mindegree(poly([]), 0) :- !.
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
 %
+% 0 is neutral for polyplus
+polyplus(P1, poly([m(0, _, _)]), P1) :- !.
+polyplus(poly([m(0, _, _)]), P1, P1) :- !.
+polyplus(P1, poly([]), P1) :- !.
+polyplus(poly([]), P1, P1) :- !.
 
 % polyplus accepts monomials too, as arguments.
 polyplus(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
@@ -338,19 +343,16 @@ polyplus(poly(P), m(C, Td, Vars), Result) :-
   !,
   polyplus(poly(P), poly([m(C, Td, Vars)]), Result).
 
-% 0 is neutral for polyplus (and polyminus)
-polyplus(P1, poly([m(0, _, _)]), P1) :- !.
-polyplus(poly([m(0, _, _)]), P1, P1) :- !.
-polyplus(P1, poly([]), P1) :- !.
-polyplus(poly([]), P1, P1) :- !.
-
 polyplus(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
   norm_p(P3o, P3).
 
-%%%% polyplus(+P1, +P2, -Diff)
+%%%% polyminus(+P1, +P2, -Diff)
 %% True when Diff unifies with the polynomial difference of P1 and P2.
 %
+% 0 is neutral for polyminus
+polyminus(P1, poly([]), P1) :- !.
+polyminus(poly([]), P1, P1) :- !.
 
 % polyminus accepts monomials too, as arguments.
 polyminus(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
