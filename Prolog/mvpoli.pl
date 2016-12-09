@@ -30,6 +30,14 @@ as_monomial(Input, Monomial) :-
   td(Vd, TD),
   norm_m(m(C, TD, Vd), Monomial).
 
+%%%% as_monomial_i(-Mono1, +Mono2)
+%% True when Mono1 unifies with the opposite of Mono2.
+%
+as_monomial_i(X, m(OC, TD, Vs)) :-
+  as_monomial_p(X, C, Vs),
+  OC is -C,
+  td(Vs, TD).
+
 %%%% as_polynomial(+Expression, -Monomials)
 %% True when Monomials unifies with the list of the Input
 %% monomials.
@@ -46,14 +54,6 @@ as_polynomial_p(X - Y, [M | Ms]) :-
 
 as_polynomial_p(X, [M]) :-
   as_monomial(X, M).
-
-%%%% as_monomial_i(-Mono1, +Mono2)
-%% True when Mono1 unifies with the opposite of Mono2.
-%
-as_monomial_i(X, m(OC, TD, Vs)) :-
-  as_monomial_p(X, C, Vs),
-  OC is -C,
-  td(Vs, TD).
 
 as_monomial_p(X, X, []) :-
   number(X),
@@ -200,7 +200,12 @@ is_polynomial(poly(Monomials)) :-
 %% of Poly.
 %
 pprint_polynomial(poly(L)) :-
+  !,
   pprint_pp(L).
+
+pprint_polynomial(Expression) :-
+  as_polynomial(Expression, Poly),
+  pprint_polynomial(Poly).
 
 pprint_pp(m(0, _, _)) :-
   !,
@@ -256,8 +261,14 @@ pprint_v(v(X, Y)) :-
 %% True when Coefficients unifies with the list of every monomial coefficient
 %% of Poly.
 %
+
 coefficients(poly(Ms), C) :-
+  !,
   coefficients_l(Ms, C).
+
+coefficients(Expression) :-
+  as_polynomial(Expression, Poly),
+  coefficients(Poly, C).
 
 coefficients_l([], []) :- !.
 
@@ -271,9 +282,14 @@ coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
 %% lexicographical order. Duplicates are removed (the highest 
 %% grade is kept).
 % 
-variables(P, Vars) :-
-  variables_ao(P, AOVars),
+variables(poly(P), Vars) :-
+  !,
+  variables_ao(poly(P), AOVars),
   sort(0, @=<, AOVars, Vars).
+
+variables(Expression) :-
+  as_polynomial(Expression, Poly),
+  variables(Poly, Vars).
 
 %%%% variables_ao(+Poly, -Vars)
 %% True when Vars unifies with the list of every Variable in Poly in the
@@ -302,7 +318,11 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 %%%% monomials(+Poly, -Monomials)
 %% True when Monomials unifies with the list of every monomail in Poly.
 % 
-monomials(poly(Ms), Ms).
+monomials(poly(Ms), Ms) :- !.
+
+monomials(Expression) :-
+  as_polynomial(Expression, Poly),
+  monomials(Poly, Ms).
 
 %%%% maxdegree(+Poly, -MaxD)
 %% True when MD unifies with the maximum degree of the monomials in Poly.
