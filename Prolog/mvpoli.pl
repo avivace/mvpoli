@@ -266,7 +266,7 @@ coefficients(poly(Ms), C) :-
   !,
   coefficients_l(Ms, C).
 
-coefficients(Expression) :-
+coefficients(Expression, C) :-
   as_polynomial(Expression, Poly),
   coefficients(Poly, C).
 
@@ -287,7 +287,7 @@ variables(poly(P), Vars) :-
   variables_ao(poly(P), AOVars),
   sort(0, @=<, AOVars, Vars).
 
-variables(Expression) :-
+variables(Expression, Vars) :-
   as_polynomial(Expression, Poly),
   variables(Poly, Vars).
 
@@ -320,7 +320,7 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 % 
 monomials(poly(Ms), Ms) :- !.
 
-monomials(Expression) :-
+monomials(Expression, Ms) :-
   as_polynomial(Expression, Poly),
   monomials(Poly, Ms).
 
