@@ -203,6 +203,7 @@ pprint_polynomial(poly(L)) :-
   !,
   pprint_pp(L).
 
+% Accept an Expression, too
 pprint_polynomial(Expression) :-
   as_polynomial(Expression, Poly),
   pprint_polynomial(Poly).
@@ -266,6 +267,7 @@ coefficients(poly(Ms), C) :-
   !,
   coefficients_l(Ms, C).
 
+% Accept an Expression, too
 coefficients(Expression, C) :-
   as_polynomial(Expression, Poly),
   coefficients(Poly, C).
@@ -287,6 +289,7 @@ variables(poly(P), Vars) :-
   variables_ao(poly(P), AOVars),
   sort(0, @=<, AOVars, Vars).
 
+% Accept an Expression, too
 variables(Expression, Vars) :-
   as_polynomial(Expression, Poly),
   variables(Poly, Vars).
@@ -320,6 +323,7 @@ variables_vars([v(_, N) | Vs], [N | Ns]) :-
 % 
 monomials(poly(Ms), Ms) :- !.
 
+% Accept an Expression, too
 monomials(Expression, Ms) :-
   as_polynomial(Expression, Poly),
   monomials(Poly, Ms).
@@ -330,16 +334,27 @@ monomials(Expression, Ms) :-
 maxdegree(poly([m(0, _, _)]), 0).
 maxdegree(poly([]), 0) :- !.
 
-maxdegree(poly([m(_, MaxD, _) | _]), MaxD).
+maxdegree(poly([m(_, MaxD, _) | _]), MaxD) :- !.
+
+% Accept an Expression, too
+maxdegree(Expression, MaxDegree) :-
+  as_polynomial(Expression, Poly),
+  maxdegree(Poly, MaxDegree).
 
 %%%% mindegree(+Poly, -MinD)
 %% True when MD unifies with the minimum degree of the monomials in Poly.
 %
+mindegree(poly([m(0, _, _)]), 0) :- !.
+mindegree(poly([]), 0) :- !.
+
 mindegree(poly(Ms), MinD) :-
+  !,
   reverse(Ms, ([m(_, MinD, _) | _])).
 
-mindegree(poly([m(0, _, _)]), 0).
-mindegree(poly([]), 0) :- !.
+% Accept an Expression, too
+mindegree(Expression, MinDegree) :-
+  as_polynomial(Expression, Poly),
+  mindegree(Poly, MinDegree).
 
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
@@ -364,8 +379,26 @@ polyplus(poly(P), m(C, Td, Vars), Result) :-
   polyplus(poly(P), poly([m(C, Td, Vars)]), Result).
 
 polyplus(poly(P1), poly(P2), poly(P3)) :-
+  !,
   append(P1, P2, P3o),
   norm_p(P3o, P3).
+
+% The first, the second, or both arguments can be Expressions
+polyplus(Expression, poly(P2), Result) :-
+  !,
+  as_polynomial(Expression, Poly1),
+  polyplus(Poly1, poly(P2), Result).
+
+polyplus(poly(P1), Expression, Result) :-
+  !,
+  as_polynomial(Expression, Poly2),
+  polyplus(poly(P1), Poly2, Result).
+
+polyplus(Expression1, Expression2, Result) :-
+  !,
+  as_polynomial(Expression1, Poly1),
+  as_polynomial(Expression2, Poly2),
+  polyplus(Poly1, Poly2, Result).
 
 %%%% polyminus(+P1, +P2, -Diff)
 %% True when Diff unifies with the polynomial difference of P1 and P2.
@@ -387,9 +420,27 @@ polyminus(poly(P), m(C, Td, Vars), Result) :-
   !,
   polyminus(poly(P), poly([m(C, Td, Vars)]), Result).
 
-polyminus(P1, P2, P3) :-
-  poly_i(P2, P2i),
-  polyplus(P1, P2i, P3).
+polyminus(poly(P1), poly(P2), poly(P3)) :-
+  !,
+  poly_i(poly(P2), P2i),
+  polyplus(poly(P1), P2i, poly(P3)).
+
+% The first, the second, or both arguments can be Expressions
+polyminus(Expression, poly(P2), Result) :-
+  !,
+  as_polynomial(Expression, Poly1),
+  polyminus(Poly1, poly(P2), Result).
+
+polyminus(poly(P1), Expression, Result) :-
+  !,
+  as_polynomial(Expression, Poly2),
+  polyminus(poly(P1), Poly2, Result).
+
+polyminus(Expression1, Expression2, Result) :-
+  !,
+  as_polynomial(Expression1, Poly1),
+  as_polynomial(Expression2, Poly2),
+  polyminus(Poly1, Poly2, Result).
 
 poly_i(poly(Ms), poly(IMs)) :-
   poly_ii(Ms, IMs).
@@ -442,9 +493,27 @@ polytimes(A, poly([m(1, _, [])]), A) :- !.
 polytimes(poly([m(1, _, [])]), A, A) :- !.
 
 polytimes(poly(M1s), poly(M2s), poly(ResultN)) :-
+  !,
   polytimes_m(M1s, M2s, Result),
   flatten(Result, ResultF),
   norm_p(ResultF, ResultN).
+
+% The first, the second, or both arguments can be Expressions
+polytimes(Expression, poly(P2), Result) :-
+  !,
+  as_polynomial(Expression, Poly1),
+  polytimes(Poly1, poly(P2), Result).
+
+polytimes(poly(P1), Expression, Result) :-
+  !,
+  as_polynomial(Expression, Poly2),
+  polytimes(poly(P1), Poly2, Result).
+
+polytimes(Expression1, Expression2, Result) :-
+  !,
+  as_polynomial(Expression1, Poly1),
+  as_polynomial(Expression2, Poly2),
+  polytimes(Poly1, Poly2, Result).
 
 polytimes_m(M1s, [m(C, Td, Vars)], R) :-
   !,
@@ -473,14 +542,21 @@ polymono([M | Ms], M2, [R | Rs]) :-
 %% Values is a list of integers associating with the list variables
 %% (lexicographical order).
 %
-polyval(Poly, InputValues, Result) :-
-  vvList(Poly, InputValues, VVList),
-  variables_ao(Poly, AOVars),
+polyval(poly(P1), InputValues, Result) :-
+  !,
+  vvList(poly(P1), InputValues, VVList),
+  variables_ao(poly(P1), AOVars),
   getVValues(VVList, AOVars, AOVVars),
   stripValues(AOVVars, AOInputValues),
-  with_output_to(string(PPoly), pprint_polynomial(Poly)),
+  with_output_to(string(PPoly), pprint_polynomial(poly(P1))),
   term_string(Term, PPoly, [variables(AOInputValues)]),
   Result is Term.
+
+% Accept an Expression, too
+polyval(Expression, InputValues, Result) :-
+  !,
+  as_polynomial(Expression, Poly),
+  polyval(Poly, InputValues, Result).
 
 %%%% vvList(+Poly, +Values, -VarValues)
 %% True when VarValues unifies with a list of (Var, Value) pairs.
