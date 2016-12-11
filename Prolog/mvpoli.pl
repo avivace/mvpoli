@@ -129,13 +129,34 @@ norm_mm([v(C1, X)], [v(C1,X)]).
 %% Monomials.
 %
 norm_p(Monomials, NMonomials) :-
-  sort(3, @=<, Monomials, FOMonomials),
+  % Second Ordering: lexicographical
+  add_varstring(Monomials, MonomialsString),
+  sort(4, @=<, MonomialsString, FOMonomialsString),
+  strip_varstring(FOMonomialsString, FOMonomials),
+  % First Ordering: total degree
   sort(2, @>=, FOMonomials, SOMonomials),
   norm_pp(SOMonomials, PNSOMonolias),
   norm_ms(PNSOMonolias, NMonomials).
-  %sort(3, @<=, NMonomials, FOMonomials_1),
-  %sort(2, @>=, FOMonomials_1, SOMonomials_1).
 
+% Support Predicates for the Second Ordering
+add_varstring([m(C,Td,Vars)], [m(C,Td,Vars,VarString)]) :-
+  !,
+  add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)).
+
+add_varstring([m(C,Td,Vars) | Ms], [m(C,Td,Vars,VarString) | OMs]) :-
+  !,
+  add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)),
+  add_varstring(Ms, OMs).
+
+add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)) :-
+  !,
+  variables(poly([m(C,Td,Vars)]), VarList),
+  string_to_list(VarString, VarList).
+
+strip_varstring([m(C,Td,Vars,_)], [m(C,Td,Vars)]) :- !.
+strip_varstring([m(C,Td,Vars,_) | Ms], [m(C,Td,Vars) | SMs]) :-
+  !,
+  strip_varstring(Ms, SMs).
 
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
@@ -331,7 +352,7 @@ monomials(Expression, Ms) :-
 %%%% maxdegree(+Poly, -MaxD)
 %% True when MD unifies with the maximum degree of the monomials in Poly.
 %
-maxdegree(poly([m(0, _, _)]), 0).
+maxdegree(poly([m(0, _, _)]), 0) :- !.
 maxdegree(poly([]), 0) :- !.
 
 maxdegree(poly([m(_, MaxD, _) | _]), MaxD) :- !.
@@ -592,5 +613,4 @@ getValue(Var, [(_, _) | VVList], Value) :-
 stripValues([(_, Value)], [Value]) :- !.
 stripValues([(_, Value) | VValues], [Value | Values]) :-
   stripValues(VValues, Values).
-
 %%%%% end of file -- mvpoli.pl --
