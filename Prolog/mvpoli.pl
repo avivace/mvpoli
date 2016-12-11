@@ -5,7 +5,7 @@
 %%%%% 793509 Vivace Antonio
 
 %% TODO
-%   ! Ordering (toString, 2 sorts?)
+%   - maxdegree/MinDegree question
 %
 %% FIXME
 %  - Polytimes still needs a cut. Unwanted backtracking (When?)
