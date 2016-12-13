@@ -6,10 +6,8 @@
 
 %% TODO
 %   - maxdegree/MinDegree question
-%
 %% FIXME
-%  - Polytimes still needs a cut. Unwanted backtracking (When?)
-%  - Initial spaces in lists (polytimes results)
+%   - as_monomial(7) not working?
 
 % PARSING %
 
@@ -94,8 +92,6 @@ td([v(N1, _) | Vs], N) :-
 
 td([v(N1, _)], N1).
 
-td([], 0).
-
 % NORMALISATION %
 
 %%%% norm_m(+Mono1, -Mono2)
@@ -137,6 +133,34 @@ norm_p(Monomials, NMonomials) :-
   sort(2, @>=, FOMonomials, SOMonomials),
   norm_pp(SOMonomials, PNSOMonolias),
   norm_ms(PNSOMonolias, NMonomials).
+
+/*
+"a^2" is interpreted as "a"
+SHOULD BE "aa"
+
+sort_disparity_m(>,m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
+  sort_disparity([Vars1, Vars2], [Vars1, Vars2]),
+  !.
+
+sort_disparity_m(<, m(_, Td1, Vars2), m(_, Td1, Vars1)) :-
+  sort_disparity([Vars1, Vars2], [Vars2, Vars1]),
+  !.
+
+sort_disparity([[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]], [[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]]) :-
+  msort([Var1, Var2], [Var1, Var2]),
+  sort_disparity(Vars1, Vars2),
+  !.
+
+sort_disparity([[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]], [[v(VC2,Var2) | Vars2], [v(VC1,Var1) | Vars1]]) :-
+  msort([Var1, Var2], [Var2, Var1]),
+  sort_disparity(Vars2, Vars1),
+  !.
+
+sort_disparity(X,X) :- !.
+sort_disparity([], []) :- !.
+sort_disparity(_, []) :- !.
+sort_disparity([], _) :- !.
+*/
 
 % Support Predicates for the Second Ordering
 add_varstring([m(C,Td,Vars)], [m(C,Td,Vars,VarString)]) :-
@@ -317,7 +341,7 @@ variables(Expression, Vars) :-
 
 %%%% variables_ao(+Poly, -Vars)
 %% True when Vars unifies with the list of every Variable in Poly in the
-%% appearing order. Duplicates are removed (the highest 
+%% Appearing Order. Duplicates are removed (the highest 
 %% grade is kept).
 % 
 variables_ao(poly(Ms), Vars) :-
@@ -424,11 +448,18 @@ polyplus(Expression1, Expression2, Result) :-
 %%%% polyminus(+P1, +P2, -Diff)
 %% True when Diff unifies with the polynomial difference of P1 and P2.
 %
+polyminus(poly(P1), poly(P2), poly(P3)) :-
+  !,
+  poly_i(poly(P2), P2i),
+  polyplus(poly(P1), P2i, poly(P3)).
+
 % 0 is neutral for polyminus
 polyminus(P1, poly([]), P1) :- !.
 polyminus(poly([]), P1, P1) :- !.
+polyminus(P1, poly([m(0, 0, [])]), P1) :- !.
+polyminus(poly([m(0, 0, [])]), P1, P1) :- !.
 
-% polyminus accepts monomials too, as arguments.
+% polyminus accepts monomials too, as arguments
 polyminus(m(C, Td, Vars), m(C2, Td2, Vars), Result) :-
   !,
   polyminus(poly([m(C, Td, Vars)]), poly([m(C2, Td2, Vars)]), Result).
@@ -441,12 +472,7 @@ polyminus(poly(P), m(C, Td, Vars), Result) :-
   !,
   polyminus(poly(P), poly([m(C, Td, Vars)]), Result).
 
-polyminus(poly(P1), poly(P2), poly(P3)) :-
-  !,
-  poly_i(poly(P2), P2i),
-  polyplus(poly(P1), P2i, poly(P3)).
-
-% The first, the second, or both arguments can be Expressions
+% polyminus accepts expressions too, as arguments
 polyminus(Expression, poly(P2), Result) :-
   !,
   as_polynomial(Expression, Poly1),
@@ -613,4 +639,5 @@ getValue(Var, [(_, _) | VVList], Value) :-
 stripValues([(_, Value)], [Value]) :- !.
 stripValues([(_, Value) | VValues], [Value | Values]) :-
   stripValues(VValues, Values).
+
 %%%%% end of file -- mvpoli.pl --
