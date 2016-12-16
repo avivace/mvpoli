@@ -4,11 +4,6 @@
 %%%%% 793307 Trovato Gaetano
 %%%%% 793509 Vivace Antonio
 
-%% TODO
-%   - maxdegree/MinDegree question
-%% FIXME
-%   - as_monomial(7) not working?
-
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
@@ -36,7 +31,7 @@ as_monomial_i(X, m(OC, TD, Vs)) :-
   OC is -C,
   td(Vs, TD).
 
-%%%% as_polynomial(+Expression, -Monomials)
+%%%% as_polynomial_p(+Expression, -Monomials)
 %% True when Monomials unifies with the list of the Input
 %% monomials.
 %
@@ -90,7 +85,9 @@ td([v(N1, _) | Vs], N) :-
   !,
   N is N1+N2.
 
-td([v(N1, _)], N1).
+td([v(N1, _)], N1) :- !.
+
+td([], 0).
 
 % NORMALISATION %
 
@@ -120,67 +117,14 @@ norm_mm([v(C1, X), v(C2, Y) | Ms], [v(C1,X) | MMs]) :-
 
 norm_mm([v(C1, X)], [v(C1,X)]).
 
-%%%% norm_p(+Monomials, -NMonomials)
+%%%% norm_p(+Monomials, -NSMonomials)
 %% True when NMonomials unifies with the list of normalised
-%% Monomials.
+%% and sorted Monomials.
 %
-norm_p(Monomials, NMonomials) :-
-  % Second Ordering: lexicographical
-  add_varstring(Monomials, MonomialsString),
-  sort(4, @=<, MonomialsString, FOMonomialsString),
-  strip_varstring(FOMonomialsString, FOMonomials),
-  % First Ordering: total degree
-  sort(2, @>=, FOMonomials, SOMonomials),
-  norm_pp(SOMonomials, PNSOMonolias),
-  norm_ms(PNSOMonolias, NMonomials).
-
-/*
-"a^2" is interpreted as "a"
-SHOULD BE "aa"
-
-sort_disparity_m(>,m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
-  sort_disparity([Vars1, Vars2], [Vars1, Vars2]),
-  !.
-
-sort_disparity_m(<, m(_, Td1, Vars2), m(_, Td1, Vars1)) :-
-  sort_disparity([Vars1, Vars2], [Vars2, Vars1]),
-  !.
-
-sort_disparity([[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]], [[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]]) :-
-  msort([Var1, Var2], [Var1, Var2]),
-  sort_disparity(Vars1, Vars2),
-  !.
-
-sort_disparity([[v(VC1,Var1) | Vars1], [v(VC2,Var2) | Vars2]], [[v(VC2,Var2) | Vars2], [v(VC1,Var1) | Vars1]]) :-
-  msort([Var1, Var2], [Var2, Var1]),
-  sort_disparity(Vars2, Vars1),
-  !.
-
-sort_disparity(X,X) :- !.
-sort_disparity([], []) :- !.
-sort_disparity(_, []) :- !.
-sort_disparity([], _) :- !.
-*/
-
-% Support Predicates for the Second Ordering
-add_varstring([m(C,Td,Vars)], [m(C,Td,Vars,VarString)]) :-
-  !,
-  add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)).
-
-add_varstring([m(C,Td,Vars) | Ms], [m(C,Td,Vars,VarString) | OMs]) :-
-  !,
-  add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)),
-  add_varstring(Ms, OMs).
-
-add_varstring_b(m(C,Td,Vars), m(C,Td,Vars,VarString)) :-
-  !,
-  variables(poly([m(C,Td,Vars)]), VarList),
-  string_to_list(VarString, VarList).
-
-strip_varstring([m(C,Td,Vars,_)], [m(C,Td,Vars)]) :- !.
-strip_varstring([m(C,Td,Vars,_) | Ms], [m(C,Td,Vars) | SMs]) :-
-  !,
-  strip_varstring(Ms, SMs).
+norm_p(Monomials, NSMonomials) :-
+  norm_pp(Monomials, PMonomials),
+  norm_ms(PMonomials, NMonomials),
+  predsort(sort_m, NMonomials, NSMonomials).
 
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
@@ -212,6 +156,35 @@ norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
   norm_pp([m(C2, S2, Y) | Ms], MMs).
 
 norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
+
+% SORTING %
+
+sort_m(>, m(_, Td1, _), m(_, Td2, _)) :-
+  Td1 < Td2,
+  !.
+
+sort_m(<, m(_, Td1, _), m(_, Td2, _)) :-
+  Td1 > Td2,
+  !.
+
+sort_m(>, m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
+  sort_disparity(Vars2, Vars1),
+  !.
+
+sort_m(<, m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
+  sort_disparity(Vars1, Vars2),
+  !.
+
+sort_disparity([v(_,Var1) | Vars1], [v(_,Var1) | Vars2]) :-
+  !,
+  sort_disparity(Vars1, Vars2).
+
+sort_disparity([v(_,Var1) | _], [v(_,Var2) | _]) :-
+  msort([Var1, Var2], [Var1, Var2]),
+  !.
+
+sort_disparity([], []) :- !.
+sort_disparity([], _) :- !.
 
 % CHECKING %
 
@@ -266,10 +239,19 @@ pprint_pp([M | Ms]) :-
   pprint_m(M),
   write(' + '),
   pprint_pp(Ms).
+%% TODO: print_coefficient
+% Print + as part of the coefficient from the second Monomial on.
+% If it's - print also for the first Monomial.
 
 pprint_m(m(1, _, L)) :-
   !,
   pprint_mm(L).
+
+pprint_m(m(-1, _, L)) :-
+  !,
+  write('-'),
+  pprint_mm(L).
+
 pprint_m(m(X, 0, [])) :-
   !,
   write(X).
