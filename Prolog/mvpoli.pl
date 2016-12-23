@@ -122,9 +122,10 @@ norm_mm([v(C1, X)], [v(C1,X)]).
 %% and sorted Monomials.
 %
 norm_p(Monomials, NSMonomials) :-
-  norm_pp(Monomials, PMonomials),
-  norm_ms(PMonomials, NMonomials),
-  predsort(sort_m, NMonomials, NSMonomials).
+  predsort(sort_m, Monomials, SMonomials),
+  norm_pp(SMonomials, PMonomials),
+  norm_ms(PMonomials, NSMonomials).
+  %predsort(sort_m, NMonomials, NSMonomials).
 
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
@@ -141,9 +142,9 @@ norm_pp([m(C2, S2, Y), m(0, _, _) | Ms], MMs) :-
   !,
   norm_pp([m(C2, S2, Y) | Ms], MMs).
 
-norm_pp([m(0, _, _), m(C2, S2, Y) | Ms], MMs) :-
+norm_pp([m(0, _, _), m(C2, Td, Y) | Ms], MMs) :-
   !,
-  norm_pp([m(C2, S2, Y) | Ms], MMs).
+  norm_pp([m(C2, Td, Y) | Ms], MMs).
 
 norm_pp([m(C1, S1, X), m(C2, _, X) | Ms], MMs ) :-
   !,
@@ -160,11 +161,11 @@ norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
 % SORTING %
 
 sort_m(>, m(_, Td1, _), m(_, Td2, _)) :-
-  Td1 < Td2,
+  Td1 > Td2,
   !.
 
 sort_m(<, m(_, Td1, _), m(_, Td2, _)) :-
-  Td1 > Td2,
+  Td1 < Td2,
   !.
 
 sort_m(>, m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
