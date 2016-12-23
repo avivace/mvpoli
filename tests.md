@@ -77,3 +77,15 @@ polytimes(poly1, poly1)
 RESULT
 36 * X^2 * Y^6 + -12 * X^3 * Y^3 + 12 * L * X * Y^3 + 12 * O * X * Y^3 + X^4 + -2 * L * X^2 + -2 * O * X^2 + 2 * L * O + L^2 + O^2
 ```
+
+#### Test 8
+```
+QUERY
+as_polynomial(x-4, P),
+polytimes(P,P, R1),
+polytimes(R1,P, R),
+pprint_polynomial(R).
+
+RESULT
+[Prolog] Not normalising (!)
+```
