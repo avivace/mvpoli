@@ -122,9 +122,9 @@ norm_mm([v(C1, X)], [v(C1,X)]).
 %% and sorted Monomials.
 %
 norm_p(Monomials, NSMonomials) :-
-  norm_pp(Monomials, PMonomials),
-  norm_ms(PMonomials, NMonomials),
-  predsort(sort_m, NMonomials, NSMonomials).
+  predsort(sort_m, Monomials, SMonomials),
+  norm_pp(SMonomials, PMonomials),
+  norm_ms(PMonomials, NSMonomials).
 
 norm_ms([m(C, Td, Vars)], [NMonomial]) :-
   !,
@@ -137,34 +137,34 @@ norm_ms([m(C, Td, Vars) | Ms], [NMonomial | NMs]) :-
 %%%% norm_pp(+Monomials, -SMonomials)
 %% True when SMonomials unifies with the list of simplyfied Monomials.
 %
-norm_pp([m(C2, S2, Y), m(0, _, _) | Ms], MMs) :-
+norm_pp([m(C, Td, Vs), m(0, _, _) | Ms], MMs) :-
   !,
-  norm_pp([m(C2, S2, Y) | Ms], MMs).
+  norm_pp([m(C, Td, Vs) | Ms], MMs).
 
-norm_pp([m(0, _, _), m(C2, S2, Y) | Ms], MMs) :-
+norm_pp([m(0, _, _), m(C, Td, Vs) | Ms], MMs) :-
   !,
-  norm_pp([m(C2, S2, Y) | Ms], MMs).
+  norm_pp([m(C, Td, Vs) | Ms], MMs).
 
-norm_pp([m(C1, S1, X), m(C2, _, X) | Ms], MMs ) :-
+norm_pp([m(C1, Td, Vs), m(C2, _, Vs) | Ms], MMs ) :-
   !,
   C3 is C1+C2,
-  norm_pp([m(C3, S1, X) | Ms], MMs).
+  norm_pp([m(C3, Td, Vs) | Ms], MMs).
 
-norm_pp([m(C1, S1, X), m(C2, S2, Y) | Ms], [m(C1, S1, X) | MMs]) :-
+norm_pp([m(C1, S1, Vs1), m(C2, S2, Vs2) | Ms], [m(C1, S1, Vs1) | MMs]) :-
   !,
-  X \= Y,
-  norm_pp([m(C2, S2, Y) | Ms], MMs).
+  Vs1 \= Vs2,
+  norm_pp([m(C2, S2, Vs2) | Ms], MMs).
 
-norm_pp([m(C1, S1, X)], [m(C1, S1, X)]).
+norm_pp([m(C, Td, Vs)], [m(C, Td, Vs)]).
 
 % SORTING %
 
 sort_m(>, m(_, Td1, _), m(_, Td2, _)) :-
-  Td1 < Td2,
+  Td1 > Td2,
   !.
 
 sort_m(<, m(_, Td1, _), m(_, Td2, _)) :-
-  Td1 > Td2,
+  Td1 < Td2,
   !.
 
 sort_m(>, m(_, Td1, Vars1), m(_, Td1, Vars2)) :-
@@ -239,9 +239,6 @@ pprint_pp([M | Ms]) :-
   pprint_m(M),
   write(' + '),
   pprint_pp(Ms).
-%% TODO: print_coefficient
-% Print + as part of the coefficient from the second Monomial on.
-% If it's - print also for the first Monomial.
 
 pprint_m(m(1, _, L)) :-
   !,
