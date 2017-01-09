@@ -81,12 +81,16 @@ RESULT
 #### Test 8
 ```
 QUERY
-<<<<<<< HEAD
 (n+1)^3
 
 RESULT
-failing on prolog
-=======
+pprint fails on prolog
+(6+n)^3 works
+```
+
+#### Test 9
+```
+QUERY
 as_polynomial(x-4, P),
 polytimes(P,P, R1),
 polytimes(R1,P, R),
@@ -94,5 +98,4 @@ pprint_polynomial(R).
 
 RESULT
 [Prolog] Not normalising (!)
->>>>>>> 002eabc5ba5d5fad44f3b697cd425825329ce092
 ```
