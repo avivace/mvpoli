@@ -25,17 +25,16 @@ C7 = [1]
 variables(x * y * z, V1),
 variables(0 * x * y, V2),
 variables(x^0, V3),
-variables(x + y ^2, V4),
+variables(-x + y ^2, V4),
 variables(3 * b -a, V5),
 variables(m(1, 0, []), V6),
 variables(poly([m(-3, 0, []), m(-4, 1, [v(1, x)])]), V7).
 
-V1 = [x, y, z]
-V3 = V2 = []
-V4 = [x, y]
-V5 = [a, b]
-V6 = []
-V7 = [x]
+V1 = [x, y, z],
+V2 = V3, V3 = V6, V6 = [],
+V4 = [x, y],
+V5 = [a, b],
+V7 = [x].
 ```
 
 ## monomials
@@ -46,11 +45,11 @@ monomials(-pippo^123 * pluto, M3),
 monomials(x + x + x + x, M4),
 monomials(x + x + x + 0 * x, M5).
 
-M1 = [m(3, 0, []), m(1, 2, [v(1, x), v(1, y)])]
-M2 = [m(-1, 1, [v(1, y)])]
-M3 = [m(-1, 124, [v(123, pippo), v(1, pluto)])]
-M4 = [m(4, 1, [v(1, x)])]
-M5 = [m(3, 1, [v(1, x)])]
+M1 = [m(3, 0, []), m(1, 2, [v(1, x), v(1, y)])],
+M2 = [m(-1, 1, [v(1, y)])],
+M3 = [m(-1, 124, [v(123, pippo), v(1, pluto)])],
+M4 = [m(4, 1, [v(1, x)])],
+M5 = [m(3, 1, [v(1, x)])].
 ```
 
 ## maxdegree
@@ -93,34 +92,33 @@ polyplus(3, 5, PP5),
 polyplus(m(-1, 1, [v(1, x)]), 3 * x, PP6),
 polyplus(poly([m(1, 2, [v(1, a), v(1, b)])]), m(1, 2, [v(1, a), v(1, b)]), PP7).
 
-PP1 = poly([m(3, 1, [v(1, b)]), m(1, 3, [v(3, a)])])
-PP2 = poly([m(1, 1, [v(1, b)])])
-PP3 = poly([m(1, 0, []), m(1, 1, [v(1, a)]), m(1, 3, [v(3, c)])]).
-PP4 = poly([m(4, 0, [])])
-?PP5 = poly([m(8, 0, [])])
-PP6 = poly([m(2, 1, [v(1, x)])])
-PP7 = poly([m(2, 2, [v(1, a), v(1, b)])])
+PP1 = poly([m(3, 1, [v(1, b)]), m(1, 3, [v(3, a)])]),
+PP2 = poly([m(1, 1, [v(1, b)])]),
+PP3 = poly([m(1, 0, []), m(1, 1, [v(1, a)]), m(1, 3, [v(3, c)])]),
+PP4 = poly([m(4, 0, [])]),
+PP5 = poly([m(8, 0, [])]),
+PP6 = poly([m(2, 1, [v(1, x)])]),
+PP7 = poly([m(2, 2, [v(1, a), v(1, b)])]).
 ```
 
 
 ## polyminus
 ```
-polyminus(a^ 3, 3 * b, PM1)
-polyminus(0 * x, b, PM2)
-polyminus(a + c ^ 3, a ^ 0, PM3)
-polyminus(x ^ 0, 3 *x ^ 0, PM4)
-polyminus(3, 5, PM5)
-polyminus(m(-1, 1, [v(1, x)]), 3 * x, PM6).
-polyminus(poly([m(1, 2, [v(1, a), v(1, b)])]), m(1, 2, [v(1, a), v(1, b)]), PM7)
+polyminus(a^ 3, 3 * b, PM1),
+polyminus(0 * x, b, PM2),
+polyminus(a + c ^ 3, a ^ 0, PM3),
+polyminus(x ^ 0, 3 *x ^ 0, PM4),
+polyminus(3, 5, PM5),
+polyminus(m(-1, 1, [v(1, x)]), 3 * x, PM6),
+polyminus(poly([m(1, 2, [v(1, a), v(1, b)])]), m(1, 2, [v(1, a), v(1, b)]), PM7).
 
 
-PM1 = poly([m(-3, 1, [v(1, b)]), m(1, 3, [v(3, a)])])
-PM2 = poly([m(-1, 1, [v(1, b)])])
-PM3 = poly([m(-1, 0, []), m(1, 1, [v(1, a)]), m(1, 3, [v(3, c)])]).
-PM4 = poly([m(-2, 0, [])]).
-PM5 = poly([m(-2, 0, [])]).
-PM6 = poly([m(-4, 1, [v(1, x)])]).
-PM7 = poly([])   //caso molto particolare, coef è zero e quinidi elimino monomio!
+PM1 = poly([m(-3, 1, [v(1, b)]), m(1, 3, [v(3, a)])]),
+PM2 = poly([m(-1, 1, [v(1, b)])]),
+PM3 = poly([m(-1, 0, []), m(1, 1, [v(1, a)]), m(1, 3, [v(3, c)])]),
+PM4 = PM5, PM5 = poly([m(-2, 0, [])]),
+PM6 = poly([m(-4, 1, [v(1, x)])]),
+PM7 = poly([m(0, 0, [])]).//caso molto particolare, coef è zero e quinidi elimino monomio!
 ```
 
 
@@ -128,32 +126,32 @@ PM7 = poly([])   //caso molto particolare, coef è zero e quinidi elimino monomi
 
 ## polytimes
 ```
-polytimes(1, a * b * c, PT1)
-polytimes(0, a * b * c, PT2)
-polytimes(a^0, a, PT3)
-polytimes(pippo * pluto, 0 + pippo, PT4)
-polytimes(x + y, a * b * c, PT5)
-polytimes(x + y, a + b, PT6)
-polytimes(a + b, a + b, PT7)
+polytimes(1, a * b * c, PT1),
+polytimes(0, a * b * c, PT2),
+polytimes(a^0, a, PT3),
+polytimes(pippo * pluto, 0 + pippo, PT4),
+polytimes(x + y, a * b * c, PT5),
+polytimes(x + y, a + b, PT6),
+polytimes(a + b, a + b, PT7).
 
 
-PT1 = poly([m(1, 3, [v(1, a), v(1, b), v(1, c)])])
-PT2 = poly([])     // coef 0
-PT3 = poly([m(1, 1, [v(1, a)])])
-PT4 = poly([m(1, 3, [v(2, pippo), v(1, pluto)])]).
-PT5 = poly([m(1, 4, [v(1, a), v(1, b), v(1, c), v(1, x)]), m(1, 4, [v(1, a), v(1, b), v(1, c), v(1, y)])]).
-PT6 = poly([m(1, 2, [v(1, a), v(1, x)]), m(1, 2, [v(1, a), v(1, y)]), m(1, 2, [v(1, b), v(1, x)]), m(1, 2, [v(1, b), v(1, y)])])
-PT7 = poly([m(2, 2, [v(1, a), v(1, b)]), m(1, 2, [v(2, a)]), m(1, 2, [v(2, b)])]).
+PT1 = poly([m(1, 3, [v(1, a), v(1, b), v(1, c)])]),
+PT2 = poly([m(0, 0, [])]),
+PT3 = poly([m(1, 1, [v(1, a)])]),
+PT4 = poly([m(1, 3, [v(2, pippo), v(1, pluto)])]),
+PT5 = poly([m(1, 4, [v(1, a), v(1, b), v(1, c), v(1, x)]), m(1, 4, [v(1, a), v(1, b), v(1, c), v(1, y)])]),
+PT6 = poly([m(1, 2, [v(1, a), v(1, x)]), m(1, 2, [v(1, a), v(1, y)]), m(1, 2, [v(1, b), v(1, x)]), m(1, 2, [v(1, b), v(1, y)])]),
+PT7 = poly([m(1, 2, [v(2, a)]), m(2, 2, [v(1, a), v(1, b)]), m(1, 2, [v(2, b)])]).
 ```
 
 ## as_monomial
 ```
-as_monomial(3 * ciao ^2 * bea ^ 3, AM1)
-as_monomial(3 * x ^ 0, AM2)
-as_monomial(0 * a * b * c * quellochevoglio, AM3)
-as_monomial(-foo^42, AM4)
-as_monomial(-42 * foo * bar ^ 42, AM5)
-as_monomial(pippo * pippo * pippo * pippo * pippo^5, AM6)
+as_monomial(3 * ciao ^2 * bea ^ 3, AM1),
+as_monomial(3 * x ^ 0, AM2),
+as_monomial(0 * a * b * c * quellochevoglio, AM3),
+as_monomial(-foo^42, AM4),
+as_monomial(-42 * foo * bar ^ 42, AM5),
+as_monomial(pippo * pippo * pippo * pippo * pippo^5, AM6),
 as_monomial(a * b * a * b * a * c * b, AM7).
 
 AM1 = m(3, 5, [v(3, bea), v(2, ciao)]).
@@ -168,21 +166,22 @@ AM7 = m(1, 7, [v(3, a), v(3, b), v(1, c)]).
 ## as_polynomial
 
 ```
-as_polynomial( 0 + 0 + 0, AP1).
-as_polynomial( 0 + 0 + x, AP2)
-as_polynomial(a^2 + b^2 + a * b + b * a, AP3)
-as_polynomial(pippo + gennaro + 3 * pippo, AP4)
-as_polynomial(a * b + c * d + a * d + s * d, AP5)
-as_polynomial(-3 * pippo -4*gennaro + 1, AP6)
-as_polynomial(-3 * a ^ 4, +12 * a ^2 * a ^2, AP7)
+as_polynomial( 0 + 0 + 0, AP1),
+as_polynomial( 0 + 0 + x, AP2),
+as_polynomial(a^2 + b^2 + a * b + b * a, AP3),
+as_polynomial(pippo + gennaro + 3 * pippo, AP4),
+as_polynomial(a * b + c * d + a * d + s * d, AP5),
+as_polynomial(-3 * pippo -4*gennaro + 1, AP6),
+as_polynomial(-3 * a ^ 4 +12 * a ^2 * a ^2, AP7).
 
-AP1 = poly([]).
-AP2 = poly([m(1, 1, [v(1, x)])])
-AP3 = poly([m(2, 2, [v(1, a), v(1, b)]), m(1, 2, [v(2, a)]), m(1, 2, [v(2, b)])])
-AP4 = poly([m(1, 1, [v(1, gennaro)]), m(4, 1, [v(1, pippo)])]).
-AP5 = poly([m(1, 2, [v(1, a), v(1, b)]), m(1, 2, [v(1, a), v(1, d)]), m(1, 2, [v(1, c), v(1, d)]), m(1, 2, [v(1, d), v(1, s)])]).
-AP6 = poly([m(1, 0, []), m(-4, 1, [v(1, gennaro)]), m(-3, 1, [v(1, pippo)])]).
+AP1 = poly([m(0, 0, [])]),
+AP2 = poly([m(1, 1, [v(1, x)])]),
+AP3 = poly([m(1, 2, [v(2, a)]), m(2, 2, [v(1, a), v(1, b)]), m(1, 2, [v(2, b)])]),
+AP4 = poly([m(1, 1, [v(1, gennaro)]), m(4, 1, [v(1, pippo)])]),
+AP5 = poly([m(1, 2, [v(1, a), v(1, b)]), m(1, 2, [v(1, a), v(1, d)]), m(1, 2, [v(1, c), v(1, d)]), m(1, 2, [v(1, d), v(1, s)])]),
+AP6 = poly([m(1, 0, []), m(-4, 1, [v(1, gennaro)]), m(-3, 1, [v(1, pippo)])]),
 AP7 = poly([m(9, 4, [v(4, a)])]).
+
 ```
 
 
@@ -190,14 +189,14 @@ AP7 = poly([m(9, 4, [v(4, a)])]).
 ## polyval
 
 ```
-polyval(3, [], PV1)
-polyval(-x, [12], PV2)
-polyval(-2*x + y,[3, 2], PV3)
-polyval(0 * x * pluto, [2, 1], PV4)
-polyval(x * pippo, [0, 100000], PV5)
-polyval(x ^ 0, [], PV6)
-polyval(poly([m(1, 1, [v(1, a)]), m(4, 1, [v(1, x)])]), [1, 1], PV7)
-polyval(poly([m(3, 1, [v(1, x)]), m(1, 2, [v(2, a)])]), [-1, -2], PV8)
+polyval(3, [], PV1),
+polyval(-x, [12], PV2),
+polyval(-2*x + y,[3, 2], PV3),
+polyval(0 * x * pluto, [2, 1], PV4),
+polyval(x * pippo, [0, 100000], PV5),
+polyval(x ^ 0, [], PV6),
+polyval(poly([m(1, 1, [v(1, a)]), m(4, 1, [v(1, x)])]), [1, 1], PV7),
+polyval(poly([m(3, 1, [v(1, x)]), m(1, 2, [v(2, a)])]), [-1, -2], PV8).
 
 PV1 = 3.
 PV2 = -12.

@@ -4,7 +4,8 @@
 %%%%% 793307 Trovato Gaetano
 %%%%% 793509 Vivace Antonio
 %
-% TODO: Parse initial minus
+% TODO: fix mindegree/maxdegree
+% polyval with mixed args
 
 % PARSING %
 
