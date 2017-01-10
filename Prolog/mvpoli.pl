@@ -4,9 +4,10 @@
 %%%%% 793307 Trovato Gaetano
 %%%%% 793509 Vivace Antonio
 %
-% TODO: fix mindegree/maxdegree
-% polyval with mixed args
-
+% TODO
+% fix mindegree/maxdegree
+% unwanted backtracking on test #2
+%
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
@@ -112,6 +113,10 @@ norm_m(m(C, G, X), m(C, G, O)) :-
 %%%% norm_mm(+VarList1, -VarList2)
 %% True when VarList2 unifies with VarList1 simplified.
 %
+norm_mm([v(0, X) | Ms], MMs) :-
+  !,
+  norm_mm(Ms, MMs).
+
 norm_mm([v(C1, X) , v(C2, X) | Ms], MMs) :-
   !,
   C3 is C1+C2,
