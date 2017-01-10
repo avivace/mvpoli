@@ -6,7 +6,6 @@
 %
 % TODO: Parse initial minus
 
-
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
@@ -59,6 +58,10 @@ as_monomial_p(X * Y, C, [V | Vs]) :-
   as_monomial_p(X, C, Vs),
   !,
   as_var(Y, V).
+
+as_monomial_p(-X, -1, [V]) :-
+  !,
+  as_var(X, V).
 
 as_monomial_p(X, 1, [V]) :-
   as_var(X, V).
@@ -388,7 +391,13 @@ mindegree(Expression, MinDegree) :-
 polyplus_v(P1, poly([m(0, _, _)]), P1) :- !.
 polyplus_v(poly([m(0, _, _)]), P1, P1) :- !.
 polyplus_v(P1, poly([]), P1) :- !.
-polyplus(poly([]), P1, P1) :- !.
+polyplus_v(poly([]), P1, P1) :- !.
+polyplus_v(poly(P1), poly(P2), poly(P3)) :-
+  !,
+  append(P1, P2, P3o),
+  norm_p(P3o, P3).
+
+
 
 % polyplus accepts monomials too, as arguments.
 polyplus(Arg1, Arg2, Result) :-
@@ -396,10 +405,7 @@ polyplus(Arg1, Arg2, Result) :-
   as_valid(Arg2, Arg2v),
   polyplus_v(Arg1v, Arg2v, Result).
 
-polyplus_v(poly(P1), poly(P2), poly(P3)) :-
-  !,
-  append(P1, P2, P3o),
-  norm_p(P3o, P3).
+
 
 as_valid(poly(P1), poly(P1)) :- !.
 as_valid(m(C, Td, Vars), poly([m(C, Td, Vars)])) :- !.
