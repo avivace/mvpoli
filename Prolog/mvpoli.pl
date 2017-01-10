@@ -240,6 +240,10 @@ pprint_pp([M | Ms]) :-
   write(' + '),
   pprint_pp(Ms).
 
+pprint_m(m(C, _, [])) :-
+  !,
+  write(C).
+
 pprint_m(m(1, _, L)) :-
   !,
   pprint_mm(L).
