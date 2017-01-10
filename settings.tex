@@ -1,0 +1,18 @@
+% Build settings breaking lines in block-codes and a light BG on code
+% pandoc -V geometry:margin=1in tests.md --listings -H settings.tex -o tests.pdf --latex-engine=xelatex
+
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily,
+    showspaces=false,
+    showstringspaces=false,
+    backgroundcolor=\color{black!10},
+    showtabs=false,
+    tabsize=2,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=true,
+    breakautoindent=true,
+    linewidth=\textwidth
+}

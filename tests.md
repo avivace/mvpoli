@@ -1,4 +1,6 @@
-# Prolog Tests
+# mvpoli - Prolog Tests
+*avivace - r0.2*
+
 
 ## coefficients
 
@@ -230,7 +232,7 @@ poly2 = 3 * y + x * x
 polyminus(poly1,poly2)
 
 RESULTS
-polyminus = -X + -3 * Y + A * Y + X^3 * Y
+polyminus = -3 * Y + A * Y + X * Y
 ```
 
 #### 3
@@ -315,4 +317,14 @@ pprint_polynomial(P).
 
 RESULT
 S * T^2 * X^4 * Y^42 * Z^2
+```
+
+#### 11, var^0
+```
+QUERY
+as_polynomial(n^0+b^0+h^7,P),
+pprint_polynomial(P).
+
+RESULT
+2 + H^7
 ```
