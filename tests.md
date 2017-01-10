@@ -14,7 +14,7 @@ coefficients(m(1, 0, []), C7).
 C1 = [1]
 C2 = [-3]
 C3 = [-1, 1]
-C4 = [] 
+C4 = []
 C5 = [-3, -4]
 C6 = [-1]
 C7 = [1]
@@ -44,7 +44,7 @@ monomials(x * y + 3, M1),
 monomials(0 * x -y, M2),
 monomials(-pippo^123 * pluto, M3),
 monomials(x + x + x + x, M4),
-monomials(x + x + x + 0 * x, M5). 
+monomials(x + x + x + 0 * x, M5).
 
 M1 = [m(3, 0, []), m(1, 2, [v(1, x), v(1, y)])]
 M2 = [m(-1, 1, [v(1, y)])]
@@ -66,7 +66,7 @@ MAX1 = 0
 MAX2 = 4
 MAX3 = 3
 MAX4 = 7
-MAX5 = 7 
+MAX5 = 7
 ```
 
 ## mindegree
@@ -110,7 +110,6 @@ polyminus(0 * x, b, PM2)
 polyminus(a + c ^ 3, a ^ 0, PM3)
 polyminus(x ^ 0, 3 *x ^ 0, PM4)
 polyminus(3, 5, PM5)
-
 polyminus(m(-1, 1, [v(1, x)]), 3 * x, PM6).
 polyminus(poly([m(1, 2, [v(1, a), v(1, b)])]), m(1, 2, [v(1, a), v(1, b)]), PM7)
 
@@ -136,7 +135,7 @@ polytimes(pippo * pluto, 0 + pippo, PT4)
 polytimes(x + y, a * b * c, PT5)
 polytimes(x + y, a + b, PT6)
 polytimes(a + b, a + b, PT7)
- 
+
 
 PT1 = poly([m(1, 3, [v(1, a), v(1, b), v(1, c)])])
 PT2 = poly([])     // coef 0
@@ -146,10 +145,6 @@ PT5 = poly([m(1, 4, [v(1, a), v(1, b), v(1, c), v(1, x)]), m(1, 4, [v(1, a), v(1
 PT6 = poly([m(1, 2, [v(1, a), v(1, x)]), m(1, 2, [v(1, a), v(1, y)]), m(1, 2, [v(1, b), v(1, x)]), m(1, 2, [v(1, b), v(1, y)])])
 PT7 = poly([m(2, 2, [v(1, a), v(1, b)]), m(1, 2, [v(2, a)]), m(1, 2, [v(2, b)])]).
 ```
-
-
-
-
 
 ## as_monomial
 ```
@@ -170,7 +165,7 @@ AM6 = m(1, 9, [v(9, pippo)]).
 AM7 = m(1, 7, [v(3, a), v(3, b), v(1, c)]).
 ```
 
-## as_polynomial 
+## as_polynomial
 
 ```
 as_polynomial( 0 + 0 + 0, AP1).
@@ -194,7 +189,6 @@ AP7 = poly([m(9, 4, [v(4, a)])]).
 
 ## polyval
 
-#### Query
 ```
 polyval(3, [], PV1)
 polyval(-x, [12], PV2)
@@ -204,9 +198,7 @@ polyval(x * pippo, [0, 100000], PV5)
 polyval(x ^ 0, [], PV6)
 polyval(poly([m(1, 1, [v(1, a)]), m(4, 1, [v(1, x)])]), [1, 1], PV7)
 polyval(poly([m(3, 1, [v(1, x)]), m(1, 2, [v(2, a)])]), [-1, -2], PV8)
-```
-#### Results
-```
+
 PV1 = 3.
 PV2 = -12.
 PV3 = -4.
@@ -216,6 +208,8 @@ PV6 = 1.
 PV7 = 5.
 PV8 = -5.
 ```
+
+---
 
 #### 1
 ```
@@ -238,7 +232,7 @@ polyminus(poly1,poly2)
 
 RESULTS
 polyminus = -X + -3 * Y + A * Y + X^3 * Y
-
+```
 
 #### 3
 ```
