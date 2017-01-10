@@ -104,14 +104,16 @@
 
 ; A monomial is also a polynomial   
 (defun as-polynomial (x)
-  (cond ((eql (car x) '*)
+  (cond ((or (eql x 0) (eql x 'nil))  
+         (list 'poly (as-monomial 0)))
+        ((eql (car x) '*)
          (let ((a (as-monomial x)))
-            (list 'p (list a))))
+            (list 'poly (list a))))
         ((eql (car x) 'm)
-           (list 'p (list x)))
+           (list 'poly (list x)))
         ((eql (car x) '+)
          (let ((a (as-polynomial-helper (cdr x))))
-           (list 'p (p-norm a))))))
+           (list 'poly (p-norm a))))))
 
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
@@ -119,8 +121,7 @@
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
 
 (defun p-norm (x)
-  (sort (copy-seq (p-norm-help 
-                   (sort (copy-seq x) #'vps< :key #'fourth))) #'> :key #'third))
+  (p-norm-help (sort (copy-seq x) #'monomials<)))
 
 (defun p-norm-help (x)
   (cond ((eql (car x) 'nil) 'nil)
@@ -139,23 +140,37 @@
 (defun vps< (vps1 vps2)
   (cond ((null vps1)
          (not (null vps2)))
-        ((null vps2)
-         nil)
+        ((null vps2) nil)
         (t
          (let* ((vp1 (first vps1))
                 (vp2 (first vps2))
                 (v1 (third vp1))
-                (v2 (third vp2)))
-           (if (eq v1 v2)
-             (vps< (rest vps1) (rest vps2))
-             (string< v1 v2))))))
+                (v2 (third vp2))
+                (p1 (second vp1))
+                (p2 (second vp2)))
+           (cond ((and (eq v1 v2) (eq p1 p2))
+                  (vps< (rest vps1) (rest vps2)))
+                 ((eq v1 v2) (< p1 p2))
+                 (t (string< v1 v2)))))))
 
+
+
+(defun monomials< (m1 m2)
+  (cond ((null m1) (not (null m2)))
+        ((null m2) nil)
+        (t (let ((td1 (monomial-degree m1))
+                 (td2 (monomial-degree m2))
+                 (vps1 (varpowers m1))
+                 (vps2 (varpowers m2)))
+             (if (eq td1 td2)
+                 (vps< vps1 vps2)
+               (< td1 td2))))))
 
 ;; polynomials' operations
 
 ;; accepts polynomials and monomials even not structured
 (defun polyval (x y)
-  (cond ((eql (first x) 'p)
+  (cond ((eql (first x) 'poly)
          (polyval-helper1 x y))
         ((eql (first x) '+)
          (let ((a (as-polynomial x)))
@@ -207,22 +222,22 @@
            (polyplus (as-polynomial x) y))
         ((eql (car y) 'm)
            (polyplus x (as-polynomial y)))
-        ((and (eql 'p (car x)) (eql 'p (car y)))
+        ((and (eql 'poly (car x)) (eql 'poly (car y)))
          (let ((c (append (car (cdr x)) (car (cdr y)))))
-           (list 'p (p-norm c))))))
+           (list 'poly (p-norm c))))))
        
 (defun polyminus (x y)
    (cond ((eql y 0) x)
          ((eql x 0) 
-          (list 'p (p-sgnchange (car (cdr y)) (- 1))))
+          (list 'poly (p-sgnchange (car (cdr y)) (- 1))))
          ((eql (car x) 'm)
           (polyminus (as-polynomial x) y))
          ((eql (car y) 'm)
           (polyminus x (as-polynomial y)))
-         ((and (eql 'p (car x)) (eql 'p (car x)))
+         ((and (eql 'poly (car x)) (eql 'poly (car x)))
           (let ((a (append (car (cdr x)) 
                            (p-sgnchange (car (cdr y)) (- 1)))))
-            (list 'p (p-norm a))))))
+            (list 'poly (p-norm a))))))
 
 (defun p-sgnchange (x y)
   (if (not (eql (car x) 'nil))
@@ -259,7 +274,7 @@
            (polytimes (as-polynomial x) y))
         ((eql (car y) 'm)
            (polytimes x (as-polynomial y)))
-        (T (list 'p (p-norm (polytimes-helper1 
+        (T (list 'poly (p-norm (polytimes-helper1 
                              (monomials x)
                              (monomials y)))))))
 
@@ -289,7 +304,7 @@
 
 (defun is-polynomial (p)
   (and (listp p)
-       (eq 'p (first p))
+       (eq 'poly (first p))
        (let ((ms (monomials p)))
          (and (every #'is-monomial ms)))))
 

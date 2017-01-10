@@ -104,14 +104,16 @@
 
 ; A monomial is also a polynomial   
 (defun as-polynomial (x)
-  (cond ((eql (car x) '*)
+  (cond ((or (eql x 0) (eql x 'nil))  
+         (list 'p (as-monomial 0)))
+        ((eql (car x) '*)
          (let ((a (as-monomial x)))
             (list 'p (list a))))
         ((eql (car x) 'm)
            (list 'p (list x)))
         ((eql (car x) '+)
          (let ((a (as-polynomial-helper (cdr x))))
-           (list 'p (p-norm a))))))
+           (list 'p (p-norm2 a))))))
 
 (defun as-polynomial-helper (x) 
   (if (eql 'nil (cdr x))
@@ -119,8 +121,7 @@
       (cons (as-monomial (car x)) (as-polynomial-helper (cdr x)))))
 
 (defun p-norm (x)
-  (sort (copy-seq (p-norm-help 
-                   (sort (copy-seq x) #'vps< :key #'fourth))) #'> :key #'third))
+  (p-norm-help (sort (copy-seq (sort (copy-seq x) #'vps< :key #'fourth)) #'vps2< :key #'fourth)))
 
 (defun p-norm-help (x)
   (cond ((eql (car x) 'nil) 'nil)
@@ -139,8 +140,7 @@
 (defun vps< (vps1 vps2)
   (cond ((null vps1)
          (not (null vps2)))
-        ((null vps2)
-         nil)
+        ((null vps2) nil)
         (t
          (let* ((vp1 (first vps1))
                 (vp2 (first vps2))
@@ -150,6 +150,22 @@
              (vps< (rest vps1) (rest vps2))
              (string< v1 v2))))))
 
+
+
+(defun vps2< (vps1 vps2)
+  (cond ((null vps1)
+         (not (null vps2)))
+        ((null vps2) nil)
+        (t 
+         (let* ((vp1 (first vps1))
+                (vp2 (first vps2))
+                (v1 (third vp1))
+                (v2 (third vp2))
+                (p1 (second vp1))
+                (p2 (second vp2)))
+           (if (and (eq v1 v2) (= p1 p2))
+               (vps2< (rest vps1) (rest vps2))
+             (< p1 p2))))))
 
 ;; polynomials' operations
 
@@ -240,7 +256,7 @@
                     (monomial-coefficient (car y))))
               (c (+ (monomial-degree x) (monomial-degree (car y)))))
              (if (eql b 0)
-                 (list 'm 0 0 'nil)
+                 (list (list 'm 0 0 'nil))
                (cons (list 'm b c (m-norm a)) 
                      (polytimes-helper2 x (cdr y))))))))
 
