@@ -5,9 +5,8 @@
 %%%%% 793509 Vivace Antonio
 %
 % TODO
-% fix mindegree/maxdegree
-% unwanted backtracking on test #2
-%
+% polyval final test FAILS
+
 % PARSING %
 
 %%%% as_polynomial(+Expression, -Poly)
@@ -113,7 +112,7 @@ norm_m(m(C, G, X), m(C, G, O)) :-
 %%%% norm_mm(+VarList1, -VarList2)
 %% True when VarList2 unifies with VarList1 simplified.
 %
-norm_mm([v(0, X) | Ms], MMs) :-
+norm_mm([v(0, _) | Ms], MMs) :-
   !,
   norm_mm(Ms, MMs).
 
@@ -225,7 +224,7 @@ is_polynomial(poly(Monomials)) :-
 
 % PRINTING %
 
-%%%% pprint_polynomial(+Poly)
+%%%% pprint_polynomial(+Input)
 %% True when the Prolog interpreter succeds to print a human representation
 %% of Poly.
 %
@@ -296,29 +295,35 @@ pprint_v(v(X, Y)) :-
   write(X).
 
 % OPERATIONS %
+%%%% as_valid(+Arg, -Poly)
+%% True when Poly unifies with the internal representation of Arg
+%% Arg can be a Poly, an Expression or a Monomial.
+%
+as_valid(poly(P1), poly(P1)) :- !.
+as_valid(m(C, Td, Vars), poly([m(C, Td, Vars)])) :- !.
+as_valid(Expression, P) :-
+  as_polynomial(Expression, P).
 
-%%%% coefficients(+Poly, -Cofficients)
+%%%% coefficients(+Input, -Cofficients)
 %% True when Coefficients unifies with the list of every monomial coefficient
 %% of Poly.
 %
-
 coefficients(Arg, C) :-
   as_valid(Arg, poly(Ms)),
-  coefficients_l(Ms, C).
+  coefficients_v(Ms, C).
 
-coefficients_l([], []) :- !.
+coefficients_v([], []) :- !.
 
-coefficients_l([m(C, _, _)], [C]) :- !.
+coefficients_v([m(C, _, _)], [C]) :- !.
 
-coefficients_l([m(C, _, _) | Ms], [C | Cs]) :-
+coefficients_v([m(C, _, _) | Ms], [C | Cs]) :-
   coefficients_l(Ms, Cs).
 
-%%%% variables(+Poly, -Vars)
-%% True when Vars unifies with the list of every Variable in Poly in a
+%%%% variables(+Input, -Vars)
+%% True when Vars unifies with the list of every Variable in Input in a
 %% lexicographical order. Duplicates are removed (the highest 
 %% grade is kept).
 %
-
 variables(Arg, Vars) :-
   as_valid(Arg, Argv),
   variables_v(Argv, Vars).
@@ -352,48 +357,48 @@ variables_vars([v(_, N)], [N]) :- !.
 variables_vars([v(_, N) | Vs], [N | Ns]) :-
   variables_vars(Vs, Ns).
 
-%%%% monomials(+Poly, -Monomials)
-%% True when Monomials unifies with the list of every monomail in Poly.
+%%%% monomials(+Input, -Monomials)
+%% True when Monomials unifies with the list of every monomail in the
+%% Input poly.
 % 
-monomials(poly(Ms), Ms) :- !.
+monomials(Arg, Ms) :-
+  as_valid(Arg, poly(Ms)).
 
-% Accept an Expression, too
-monomials(Expression, Ms) :-
-  as_polynomial(Expression, Poly),
-  monomials(Poly, Ms).
-
-%%%% maxdegree(+Poly, -MaxD)
-%% True when MD unifies with the maximum degree of the monomials in Poly.
+%%%% maxdegree(+Input, -MaxD)
+%% True when MaxD unifies with the maximum degree of the monomials in
+%% the Input poly.
 %
-maxdegree(poly([m(0, _, _)]), 0) :- !.
-maxdegree(poly([]), 0) :- !.
+maxdegree(Arg, MaxD) :-
+  as_valid(Arg, Argv),
+  maxdegree_v(Argv, MaxD).
 
-maxdegree(poly([m(_, MaxD, _) | _]), MaxD) :- !.
-
-% Accept an Expression, too
-maxdegree(Expression, MaxDegree) :-
-  as_polynomial(Expression, Poly),
-  maxdegree(Poly, MaxDegree).
+maxdegree_v(poly(Ms), MaxD) :-
+  !,
+  reverse(Ms, RMs),
+  mindegree_v(RMs, MaxD).
 
 %%%% mindegree(+Poly, -MinD)
-%% True when MD unifies with the minimum degree of the monomials in Poly.
+%% True when MinD unifies with the minimum degree of the monomials in
+%% Input poly.
 %
-mindegree(poly([m(0, _, _)]), 0) :- !.
-mindegree(poly([]), 0) :- !.
+mindegree(Arg, MinD) :-
+  as_valid(Arg, poly(Argv)),
+  mindegree_v(Argv, MinD).
 
-mindegree(poly(Ms), MinD) :-
-  !,
-  reverse(Ms, ([m(_, MinD, _) | _])).
+mindegree_v([m(0, _, _)], 0) :- !.
+mindegree_v([], 0) :- !.
 
-% Accept an Expression, too
-mindegree(Expression, MinDegree) :-
-  as_polynomial(Expression, Poly),
-  mindegree(Poly, MinDegree).
+mindegree_v([m(_, MinD, _) | _ ], MinD) :- !.
 
 %%%% polyplus(+P1, +P2, -Sum)
 %% True when Sum unifies with the polynomial sum of P1 and P2.
 %
-% 0 is neutral for polyplus
+polyplus(Arg1, Arg2, Result) :-
+  as_valid(Arg1, Arg1v),
+  as_valid(Arg2, Arg2v),
+  polyplus_v(Arg1v, Arg2v, Result).
+
+% 0 is neutral for polyplus (and polyminus)
 polyplus_v(P1, poly([m(0, _, _)]), P1) :- !.
 polyplus_v(poly([m(0, _, _)]), P1, P1) :- !.
 polyplus_v(P1, poly([]), P1) :- !.
@@ -403,21 +408,6 @@ polyplus_v(poly(P1), poly(P2), poly(P3)) :-
   append(P1, P2, P3o),
   norm_p(P3o, P3).
 
-
-
-% polyplus accepts monomials too, as arguments.
-polyplus(Arg1, Arg2, Result) :-
-  as_valid(Arg1, Arg1v),
-  as_valid(Arg2, Arg2v),
-  polyplus_v(Arg1v, Arg2v, Result).
-
-
-
-as_valid(poly(P1), poly(P1)) :- !.
-as_valid(m(C, Td, Vars), poly([m(C, Td, Vars)])) :- !.
-as_valid(Expression, P) :-
-  !,
-  as_polynomial(Expression, P).
 %%%% polyminus(+P1, +P2, -Diff)
 %% True when Diff unifies with the polynomial difference of P1 and P2.
 %
@@ -430,12 +420,13 @@ polyminus(Arg1, Arg2, Result) :-
 poly_i(poly(Ms), poly(IMs)) :-
   poly_ii(Ms, IMs).
 
+poly_ii([M], [Om]) :-
+  !,
+  monomial_i(M, Om).
+
 poly_ii([ M | Ms], [OM | OMs] ) :-
   monomial_i(M, OM),
   poly_ii(Ms, OMs).
-
-poly_ii([M], [Om]) :-
-  monomial_i(M, Om).
 
 monomial_i(m(C, G, Vars), m(Ci, G, Vars)) :-
   Ci is -C.
@@ -496,9 +487,9 @@ polymono([M | Ms], M2, [R | Rs]) :-
   polymono(Ms, M2, Rs).
 
 
-%%%% polyval(+Poly, +Values, -Result)
-%% True when Result unifies with the computation of Poly using Values
-%% for the variables appearing in Poly.
+%%%% polyval(+Input, +Values, -Result)
+%% True when Result unifies with the computation of the Input poly
+%% using Values for the variables appearing in Poly.
 %% Values is a list of integers associating with the list variables
 %% (lexicographical order).
 %
