@@ -3,9 +3,6 @@
 %%%%% mvpoli.pl --
 %%%%% 793307 Trovato Gaetano
 %%%%% 793509 Vivace Antonio
-%
-% TODO
-% polyval final test FAILS
 
 % PARSING %
 
@@ -496,6 +493,8 @@ polymono([M | Ms], M2, [R | Rs]) :-
 polyval(Arg, InputValues, Result) :-
   as_valid(Arg, Argv),
   polyval_v(Argv, InputValues, Result).
+
+polyval_v(poly([m(C, _, [])]), [], C) :- !.
 
 polyval_v(poly(P1), InputValues, Result) :-
   !,

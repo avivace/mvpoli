@@ -194,7 +194,7 @@ AP7 = poly([m(9, 4, [v(4, a)])]).
 polyval(3, [], PV1),
 polyval(-x, [12], PV2),
 polyval(-2*x + y,[3, 2], PV3),
-polyval(0 * x * pluto, [2, 1], PV4),
+polyval(0 * x * pluto + a + b, [2, 1], PV4),
 polyval(x * pippo, [0, 100000], PV5),
 polyval(x ^ 0, [], PV6),
 polyval(poly([m(1, 1, [v(1, a)]), m(4, 1, [v(1, x)])]), [1, 1], PV7),
@@ -203,7 +203,7 @@ polyval(poly([m(3, 1, [v(1, x)]), m(1, 2, [v(2, a)])]), [-1, -2], PV8).
 PV1 = 3.
 PV2 = -12.
 PV3 = -4.
-PV4 = parametri non validi    //monomio = m(0, 0, [])
+PV4 = 3
 PV5 = 0.
 PV6 = 1.
 PV7 = 5.
