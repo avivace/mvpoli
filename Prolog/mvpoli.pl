@@ -195,7 +195,7 @@ sort_disparity([], []) :- !.
 sort_disparity([], _) :- !.
 
 % CHECKING %
-
+%%%% Predicates from the original text (PDF).
 %%%% is_monomial(+Monomial)
 %% True when Monomial is a valid Monomial (internal representation).
 %
@@ -314,7 +314,7 @@ coefficients_v([], []) :- !.
 coefficients_v([m(C, _, _)], [C]) :- !.
 
 coefficients_v([m(C, _, _) | Ms], [C | Cs]) :-
-  coefficients_l(Ms, Cs).
+  coefficients_v(Ms, Cs).
 
 %%%% variables(+Input, -Vars)
 %% True when Vars unifies with the list of every Variable in Input in a
