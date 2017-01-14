@@ -40,7 +40,8 @@
 
 
 (defun variables (x)
-  (sort (remove-duplicates (flatten (variables-helper (second x)))) #'string-lessp ))
+  (sort (remove-duplicates (flatten (variables-helper (second x)))) 
+        #'string-lessp ))
 
 (defun coefficients (x)
   (flatten (coefficients-helper (second x))))
@@ -222,6 +223,10 @@
            (polyplus (as-polynomial x) y))
         ((eql (car y) 'm)
            (polyplus x (as-polynomial y)))
+        ((eql (car x) '+)
+           (polyplus (as-polynomial x) y))
+        ((eql (car y) '+)
+           (polyplus x (as-polynomial y)))
         ((and (eql 'poly (car x)) (eql 'poly (car y)))
          (let ((c (append (car (cdr x)) (car (cdr y)))))
            (list 'poly (p-norm c))))))
@@ -234,6 +239,10 @@
           (polyminus (as-polynomial x) y))
          ((eql (car y) 'm)
           (polyminus x (as-polynomial y)))
+         ((eql (car x) '+)
+           (polyminus (as-polynomial x) y))
+        ((eql (car y) '+)
+           (polyminus x (as-polynomial y)))
          ((and (eql 'poly (car x)) (eql 'poly (car x)))
           (let ((a (append (car (cdr x)) 
                            (p-sgnchange (car (cdr y)) (- 1)))))
@@ -248,8 +257,6 @@
  
 (defun polytimes-helper2 (x y)
   (cond ((eql (car y) 'nil) nil)
-        ;; (let ((a (m-norm (varpowers x))))
-        ;;   (list 'm (monomial-coefficient x) (monomial-degree x) a)))
         (T (let ((a (append (varpowers x) (varpowers (car y))))
               (b (* (monomial-coefficient x) 
                     (monomial-coefficient (car y))))
@@ -273,6 +280,10 @@
         ((eql (car x) 'm)
            (polytimes (as-polynomial x) y))
         ((eql (car y) 'm)
+           (polytimes x (as-polynomial y)))
+        ((eql (car x) '+)
+           (polytimes (as-polynomial x) y))
+        ((eql (car y) '+)
            (polytimes x (as-polynomial y)))
         (T (list 'poly (p-norm (polytimes-helper1 
                              (monomials x)
