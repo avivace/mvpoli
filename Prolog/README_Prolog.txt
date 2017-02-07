@@ -1,7 +1,7 @@
 	as_valid/2
 This predicate is used on *every* operation, preparsing every argument.
 Every predicate simply calls as_valid on every argument, then calls
-PREDICATENAME_v (the 'real' one) with valid arguments.
+PREDICATENAME_v (the real workhorse) with valid arguments.
 This allows every operation to accept an Expression, a Poly or a Monomial,
 in the same way.
 
